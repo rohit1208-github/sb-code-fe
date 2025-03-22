@@ -1,51 +1,80 @@
-# Logs and temporary files
-logs
-*.log
-*.log.*
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Node dependencies
+# Dependencies
 node_modules/
+.pnp/
+.pnp.js
 
-# Next.js build output
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Next.js
 .next/
 out/
-
-# Vercel/Deployment folders
-.vercel/
-
-# Tailwind CSS generated files (if any)
-*.css.map
-
-# Production build artifacts
 build/
 dist/
 
-# Testing & coverage
-coverage/
-*.lcov
+# Debug & Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Environment variable files
+# Local env files
+.env*.local
 .env
-.env.* 
-!.env.example   # keep example env files in repo
+.env.development
+.env.test
+.env.production
+!.env.example
 
-# OS-specific or Editor-specific files
-.DS_Store
-Thumbs.db
+# Vercel
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE and Editor files
+.idea/
+.vscode/
 *.swp
 *.swo
 *.swn
 *.swm
 *.smp
 *.tmp
+*~
 
-# TypeScript cache
-*.tsbuildinfo
+# OS files
+.DS_Store
+Thumbs.db
+*.pem
 
-# Other lockfiles (if not in use or if you only want one lockfile)
-pnpm-lock.yaml
+# Package managers
 yarn.lock
 package-lock.json
+pnpm-lock.yaml
+
+# Build artifacts
+*.css.map
+.turbo
+storybook-static/
+
+# PWA files
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
+public/sw.js.map
+public/workbox-*.js.map
+public/worker-*.js.map
+
+# Optional
+# .eslintcache
+# .stylelintcache
+# .env.local.example
+
+# Project specific
+# Add any project-specific files to ignore here
