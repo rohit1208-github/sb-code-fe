@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { useCountries } from '@/hooks/useCountries'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -23,14 +24,15 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { useCountries } from '@/hooks/useCountries'
-import { toast } from 'sonner'
+import { toast } from '@/hooks/use-toast'
+import type { Country } from '@/services/countries.service'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 const countryFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   code: z.string().min(1, 'Code is required'),
   is_active: z.boolean().default(true),
-}).required()
+})
 
 type CountryFormValues = z.infer<typeof countryFormSchema>
 
@@ -40,14 +42,101 @@ const defaultValues: CountryFormValues = {
   is_active: true,
 }
 
-export function AddCountryDialog() {
+interface CountryDialogProps {
+  mode: 'add' | 'edit'
+  country?: Country
+  trigger?: React.ReactNode
+}
+
+export function CountryDialog({ mode, country, trigger }: CountryDialogProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
-  const { createCountry, isCreating } = useCountries()
+  const queryClient = useQueryClient()
+  const { createCountry, updateCountry, isCreating, isUpdating } = useCountries()
 
   const form = useForm<CountryFormValues>({
     resolver: zodResolver(countryFormSchema),
-    defaultValues,
+    defaultValues: mode === 'edit' && country 
+      ? {
+          name: country.name,
+          code: country.code,
+          is_active: country.is_active,
+        }
+      : defaultValues,
+  })
+
+  useEffect(() => {
+    if (mode === 'edit' && country) {
+      form.reset({
+        name: country.name,
+        code: country.code,
+        is_active: country.is_active,
+      })
+    }
+  }, [country, mode, form])
+
+  const handleSuccess = () => {
+    setOpen(false)
+    form.reset()
+    toast({
+      title: "Success",
+      description: `Country ${mode === 'edit' ? 'updated' : 'added'} successfully`
+    })
+    router.refresh()
+    queryClient.invalidateQueries({ queryKey: ['countries'] })
+  }
+
+  const handleError = (error: any) => {
+    console.error('Form submission error:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    })
+
+    if (error.response?.status === 400) {
+      const errorData = error.response.data
+      if (typeof errorData === 'object') {
+        Object.entries(errorData).forEach(([field, errors]) => {
+          if (Array.isArray(errors)) {
+            form.setError(field as any, {
+              type: 'server',
+              message: errors[0]
+            })
+          }
+        })
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Please correct the errors in the form"
+        })
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.response.data?.detail || 'Invalid data submitted'
+        })
+      }
+      return
+    }
+
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: error.response?.data?.detail || error.message || `Failed to ${mode} country`
+    })
+  }
+
+  const createMutation = useMutation({
+    mutationFn: createCountry,
+    onSuccess: handleSuccess,
+    onError: handleError
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: updateCountry,
+    onSuccess: handleSuccess,
+    onError: handleError
   })
 
   async function onSubmit(formData: CountryFormValues) {
@@ -60,59 +149,38 @@ export function AddCountryDialog() {
 
       console.log('Submitting data:', payload)
 
-      await createCountry(payload, {
-        onSuccess: (response) => {
-          console.log('Success response:', response?.data)
-          setOpen(false)
-          form.reset()
-          toast.success('Country added successfully')
-          router.refresh()
-        },
-        onError: (error: any) => {
-          console.error('Form submission error:', {
-            status: error.response?.status,
-            statusText: error.response?.statusText,
-            data: error.response?.data,
-            message: error.message
-          })
-
-          if (error.response?.status === 400) {
-            const errorData = error.response.data
-            if (typeof errorData === 'object') {
-              Object.entries(errorData).forEach(([field, errors]) => {
-                if (Array.isArray(errors)) {
-                  form.setError(field as any, {
-                    type: 'server',
-                    message: errors[0]
-                  })
-                }
-              })
-              toast.error('Please correct the errors in the form')
-            } else {
-              toast.error(error.response.data?.detail || 'Invalid data submitted')
-            }
-            return
-          }
-
-          toast.error(error.response?.data?.detail || error.message || 'Failed to add country')
-        },
-      })
-    } catch (error: any) {
+      if (mode === 'edit' && country) {
+        await updateMutation.mutateAsync({
+          id: country.id,
+          ...payload
+        })
+      } else {
+        await createMutation.mutateAsync(payload)
+      }
+    } catch (error) {
+      // Error will be handled by mutation error handlers
       console.error('Unexpected error:', error)
-      toast.error('An unexpected error occurred')
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Add Country</Button>
+        {trigger || (
+          <Button variant="outline">
+            {mode === 'edit' ? 'Edit Country' : 'Add Country'}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Country</DialogTitle>
+          <DialogTitle>
+            {mode === 'edit' ? 'Edit Country' : 'Add Country'}
+          </DialogTitle>
           <DialogDescription>
-            Add a new country to the system. Click save when you're done.
+            {mode === 'edit' 
+              ? 'Edit the country details below.'
+              : 'Add a new country to the system.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -161,8 +229,13 @@ export function AddCountryDialog() {
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={isCreating}>
-                {isCreating ? 'Adding...' : 'Add Country'}
+              <Button 
+                type="submit" 
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {createMutation.isPending || updateMutation.isPending
+                  ? (mode === 'edit' ? 'Updating...' : 'Adding...') 
+                  : (mode === 'edit' ? 'Update Country' : 'Add Country')}
               </Button>
             </DialogFooter>
           </form>

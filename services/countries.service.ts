@@ -24,8 +24,11 @@ export interface CreateCountryDto {
   is_active?: boolean
 }
 
-export interface UpdateCountryDto extends Partial<CreateCountryDto> {
+export interface UpdateCountryDto {
   id: number
+  name: string
+  code: string
+  is_active: boolean
 }
 
 const BASE_URL = '/api/management/countries/'
@@ -75,11 +78,29 @@ export const CountriesService = {
   },
 
   update: async ({ id, ...data }: UpdateCountryDto) => {
-    const url = `${BASE_URL.slice(0, -1)}/${id}/`
-    logApiCall('PATCH', url, data)
-    const response = await apiClient.patch<Country>(url, data)
-    console.log('📥 Response:', response.data)
-    return response
+    try {
+      const url = `${BASE_URL.slice(0, -1)}/${id}/`
+      
+      // Ensure data is properly formatted
+      const formattedData = {
+        name: String(data.name).trim(),
+        code: String(data.code).trim(),
+        is_active: Boolean(data.is_active)
+      }
+      
+      logApiCall('PUT', url, formattedData)
+      const response = await apiClient.put<Country>(url, formattedData)
+      console.log('📥 Response:', response.data)
+      return response
+    } catch (error: any) {
+      console.error('❌ Update Country Error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        originalError: error
+      })
+      throw error
+    }
   },
 
   delete: async (id: number) => {
