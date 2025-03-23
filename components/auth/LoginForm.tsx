@@ -21,7 +21,7 @@ export function LoginForm() {
 
     const formData = new FormData(event.currentTarget)
     const credentials: LoginCredentials = {
-      username: formData.get('username') as string,
+      email: formData.get('email') as string,
       password: formData.get('password') as string,
     }
 
@@ -44,13 +44,13 @@ export function LoginForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="username"
-              name="username"
-              type="text"
+              id="email"
+              name="email"
+              type="email"
               required
-              placeholder="Enter your username"
+              placeholder="Enter your email"
             />
           </div>
           <div className="space-y-2">

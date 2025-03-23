@@ -1,63 +1,83 @@
 'use client'
 
-import { AuthTokens, LoginCredentials, AuthResponse } from '@/types/auth'
+import { AuthTokens, LoginCredentials, AuthResponse, AuthError, AUTH_DEBUG } from '@/types/auth'
 import Cookies from 'js-cookie'
+import { API_CONFIG } from './api-config'
 
-const AUTH_TOKEN_KEY = 'sb-auth-token'
-const USER_KEY = 'sb-user'
+const ACCESS_TOKEN_KEY = 'sb-access-token'
+const REFRESH_TOKEN_KEY = 'sb-refresh-token'
 
-// This will be replaced with actual API call later
+const COOKIE_OPTIONS = {
+  expires: 7,
+  path: '/',
+  sameSite: 'strict'
+} as const
+
+// For debugging purposes
+const logAuthAction = (action: string, data?: any) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Auth Action: ${action}`, data)
+  }
+}
+
 export async function login(credentials: LoginCredentials): Promise<AuthResponse> {
-  // Hardcoded check for now
-  if (credentials.username === 'johnny' && credentials.password === '1234') {
-    const response = {
-      tokens: {
-        accessToken: 'dummy-access-token',
-        refreshToken: 'dummy-refresh-token'
+  logAuthAction('Login Attempt', { email: credentials.email })
+  
+  try {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGIN}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      user: {
-        id: '1',
-        username: 'johnny',
-        role: 'admin'
+      body: JSON.stringify(credentials),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      logAuthAction('Login Error', errorData)
+      throw {
+        message: errorData.detail || 'Authentication failed',
+        code: response.status.toString(),
       }
     }
-    
+
+    const data: AuthResponse = await response.json()
+    AUTH_DEBUG.logAuthResponse(data)
+
     // Store tokens in cookies
-    Cookies.set(AUTH_TOKEN_KEY, JSON.stringify(response.tokens), {
-      expires: 7, // 7 days
-      path: '/',
-      sameSite: 'strict'
-    })
+    Cookies.set(ACCESS_TOKEN_KEY, data.access, COOKIE_OPTIONS)
+    Cookies.set(REFRESH_TOKEN_KEY, data.refresh, COOKIE_OPTIONS)
 
-    // Store user info
-    Cookies.set(USER_KEY, JSON.stringify(response.user), {
-      expires: 7,
-      path: '/',
-      sameSite: 'strict'
-    })
-
-    return response
+    logAuthAction('Login Success')
+    return data
+  } catch (error) {
+    AUTH_DEBUG.logAuthError(error as AuthError)
+    throw error
   }
-  throw new Error('Invalid credentials')
 }
 
-export function getStoredAuth(): AuthTokens | null {
-  const stored = Cookies.get(AUTH_TOKEN_KEY)
-  if (!stored) return null
-  return JSON.parse(stored)
+export function getAuthTokens(): AuthTokens | null {
+  const access = Cookies.get(ACCESS_TOKEN_KEY)
+  const refresh = Cookies.get(REFRESH_TOKEN_KEY)
+
+  if (!access || !refresh) {
+    logAuthAction('Get Auth Tokens', 'No tokens found')
+    return null
+  }
+
+  logAuthAction('Get Auth Tokens', 'Tokens found')
+  return { access, refresh }
 }
 
-export function getStoredUser() {
-  const stored = Cookies.get(USER_KEY)
-  if (!stored) return null
-  return JSON.parse(stored)
-}
-
-export function clearAuth() {
-  Cookies.remove(AUTH_TOKEN_KEY, { path: '/' })
-  Cookies.remove(USER_KEY, { path: '/' })
+export function clearAuth(): void {
+  logAuthAction('Clear Auth')
+  Cookies.remove(ACCESS_TOKEN_KEY)
+  Cookies.remove(REFRESH_TOKEN_KEY)
 }
 
 export function isAuthenticated(): boolean {
-  return !!getStoredAuth()
+  const tokens = getAuthTokens()
+  const isAuth = !!tokens?.access
+  logAuthAction('Check Authentication', { isAuthenticated: isAuth })
+  return isAuth
 } 
