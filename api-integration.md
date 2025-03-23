@@ -31,7 +31,7 @@ export const API_CONFIG = {
   ENDPOINTS: {
     LOGIN: "/api/token/",
     REFRESH: "/api/token/refresh/",
-    COUNTRIES: "/api/management/countries/",
+    COUNTRIES: "/api/management/countries/", (GET)
   },
 } as const;
 ```
@@ -115,6 +115,23 @@ export const CountriesService = {
     console.log("📥 Response:", response.data);
     return response;
   },
+
+  create: async (data: CreateCountryDto) => {
+    try {
+      const formattedData = {
+        name: String(data.name).trim(),
+        code: String(data.code).trim(),
+        is_active: Boolean(data.is_active ?? true),
+      };
+
+      logApiCall("POST", BASE_URL, formattedData);
+      const response = await apiClient.post<Country>(BASE_URL, formattedData);
+      return response;
+    } catch (error) {
+      console.error("❌ Create Country Error:", error);
+      throw error;
+    }
+  },
   // ... other methods
 };
 ```
@@ -124,6 +141,9 @@ export const CountriesService = {
 ```typescript
 // Example: useCountries.ts
 export function useCountries() {
+  const queryClient = useQueryClient();
+
+  // Query for fetching countries
   const {
     data: countries,
     isLoading,
@@ -135,40 +155,207 @@ export function useCountries() {
       return response.data;
     },
   });
-  // ... mutations and other functionality
+
+  // Mutation for creating countries
+  const createMutation = useMutation({
+    mutationFn: async (newCountry: CreateCountryDto) => {
+      const response = await CountriesService.create(newCountry);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+    },
+  });
+
+  return {
+    countries,
+    isLoading,
+    error,
+    createCountry: createMutation.mutate,
+    isCreating: createMutation.isPending,
+    createError: createMutation.error,
+    // ... other methods
+  };
 }
 ```
 
-## Development and Debugging
+### 6. Form Implementation
 
-1. **Request Logging**:
+Using shadcn/ui components and Zod validation:
 
-   ```typescript
-   🔐 Using token: eyJ0eXAiOi...
-   🚀 Request: {
-     method: 'GET',
-     url: 'http://192.168.0.239:8000/api/management/countries',
-     headers: { Authorization: 'Bearer [HIDDEN]' }
-   }
-   ```
+```typescript
+// components/countries/add-country-dialog.tsx
+const countryFormSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    code: z.string().min(1, "Code is required"),
+    is_active: z.boolean().default(true),
+  })
+  .required();
 
-2. **Response Logging**:
+export function AddCountryDialog() {
+  const form = useForm<CountryFormValues>({
+    resolver: zodResolver(countryFormSchema),
+    defaultValues: {
+      name: "",
+      code: "",
+      is_active: true,
+    },
+  });
 
-   ```typescript
-   ✅ Response: {
-     status: 200,
-     data: [{ id: 1, name: 'india', ... }]
-   }
-   ```
+  async function onSubmit(formData: CountryFormValues) {
+    try {
+      await createCountry(
+        {
+          name: formData.name.trim(),
+          code: String(formData.code).trim(),
+          is_active: formData.is_active,
+        },
+        {
+          onSuccess: () => {
+            setOpen(false);
+            form.reset();
+            toast.success("Country added successfully");
+            router.refresh();
+          },
+          onError: (error) => {
+            handleValidationErrors(error, form);
+          },
+        }
+      );
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    }
+  }
+}
+```
 
-3. **Error Logging**:
-   ```typescript
-   ❌ Response Error: {
-     message: 'Request failed with status code 403',
-     status: 403,
-     data: { detail: 'Authentication credentials were not provided.' }
-   }
-   ```
+### 7. API Endpoints
+
+#### 7.1 GET /api/management/countries/
+
+- **Purpose**: Fetch all countries
+- **Authentication**: Bearer token required
+- **Response**: Array of Country objects
+
+```typescript
+interface Country {
+  id: number;
+  name: string;
+  code: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+```
+
+#### 7.2 POST /api/management/countries/
+
+- **Purpose**: Create a new country
+- **Authentication**: Bearer token required
+- **Request Body**:
+
+```typescript
+interface CreateCountryDto {
+  name: string; // Min 2 characters
+  code: string; // Required
+  is_active: boolean; // Optional, defaults to true
+}
+```
+
+- **Response**: Created Country object
+
+```json
+{
+  "id": 8,
+  "name": "France",
+  "code": "69",
+  "is_active": true,
+  "created_at": "2025-03-23T04:40:42.583756Z",
+  "updated_at": "2025-03-23T04:40:42.583826Z"
+}
+```
+
+### 8. Error Handling
+
+Enhanced error handling for form submissions:
+
+```typescript
+// Error handling in form submission
+if (error.response?.status === 400) {
+  const errorData = error.response.data;
+  if (typeof errorData === "object") {
+    // Handle field-specific validation errors
+    Object.entries(errorData).forEach(([field, errors]) => {
+      if (Array.isArray(errors)) {
+        form.setError(field as any, {
+          type: "server",
+          message: errors[0],
+        });
+      }
+    });
+    toast.error("Please correct the errors in the form");
+  }
+}
+```
+
+### 9. Integration Checklist
+
+When implementing new endpoints:
+
+1. **Service Layer**:
+
+   - [x] Add endpoint to API_CONFIG
+   - [x] Create appropriate DTOs
+   - [x] Implement service method with proper error handling
+   - [x] Add logging for debugging
+
+2. **React Query**:
+
+   - [x] Create mutation hook
+   - [x] Handle success/error states
+   - [x] Invalidate queries on success
+   - [x] Proper typing for request/response
+
+3. **Form Implementation**:
+
+   - [x] Create Zod validation schema
+   - [x] Implement form using shadcn/ui components
+   - [x] Handle server-side validation errors
+   - [x] Show success/error notifications
+
+4. **Error Handling**:
+
+   - [x] Handle network errors
+   - [x] Handle validation errors
+   - [x] Show user-friendly error messages
+   - [x] Log errors for debugging
+
+5. **Testing**:
+   - [x] Test with valid data
+   - [x] Test with invalid data
+   - [x] Verify error handling
+   - [x] Check response handling
+
+### 10. Development and Debugging
+
+Example debug output:
+
+```typescript
+🌐 API POST: http://192.168.0.239:8000/api/management/countries/
+📦 Request Data: {name: 'Pakistan', code: '1234', is_active: true}
+🔐 Using token: eyJhbGciOi...
+🚀 Request: {
+  method: 'POST',
+  url: 'http://192.168.0.239:8000/api/management/countries/',
+  data: {name: 'Pakistan', code: '1234', is_active: true},
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer [HIDDEN]'
+  }
+}
+```
 
 ## Next Steps
 

@@ -22,6 +22,7 @@ const api: AxiosInstance = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
 })
 
@@ -32,11 +33,10 @@ api.interceptors.request.use(
     const token = Cookies.get(ACCESS_TOKEN_KEY)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
-      console.log('🔐 Using token:', token.slice(0, 10) + '...')
-    } else {
-      console.warn('⚠️ No auth token found')
     }
-
+    
+    // Log request details
+    console.log('🔐 Using token:', token)
     console.log('🚀 Request:', {
       method: config.method?.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
@@ -44,9 +44,10 @@ api.interceptors.request.use(
       params: config.params,
       headers: {
         ...config.headers,
-        Authorization: config.headers.Authorization ? 'Bearer [HIDDEN]' : 'None',
+        Authorization: token ? 'Bearer [HIDDEN]' : 'None',
       },
     })
+
     return config
   },
   (error) => {
@@ -65,14 +66,32 @@ api.interceptors.response.use(
     return response
   },
   (error: AxiosError) => {
-    console.error('❌ Response Error:', {
+    const errorResponse = {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    })
+    }
+
+    // Try to parse HTML error message if received
+    if (typeof errorResponse.data === 'string' && errorResponse.data.includes('<!DOCTYPE html>')) {
+      try {
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(errorResponse.data, 'text/html')
+        const errorElement = doc.querySelector('.exception_value') || doc.querySelector('.traceback')
+        if (errorElement) {
+          errorResponse.data = {
+            detail: errorElement.textContent?.trim() || 'Server error occurred'
+          }
+        }
+      } catch (e) {
+        errorResponse.data = { detail: 'Failed to parse server error' }
+      }
+    }
+
+    console.error('❌ Response Error:', errorResponse)
     const apiError: ApiError = {
-      message: error.message || 'An unexpected error occurred',
-      status: error.response?.status,
+      message: errorResponse.message || 'An unexpected error occurred',
+      status: errorResponse.status,
       code: error.code,
     }
     return Promise.reject(apiError)

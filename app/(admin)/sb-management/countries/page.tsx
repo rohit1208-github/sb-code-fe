@@ -15,6 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
+import { AddCountryDialog } from '@/components/countries/add-country-dialog'
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -93,11 +94,7 @@ export default function CountriesPage() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Countries</CardTitle>
-        <Button
-          onClick={() => router.push('/(admin)/sb-management/countries/new')}
-        >
-          Add Country
-        </Button>
+        <AddCountryDialog />
       </CardHeader>
       <CardContent>
         <Table>

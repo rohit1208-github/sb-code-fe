@@ -28,7 +28,7 @@ export interface UpdateCountryDto extends Partial<CreateCountryDto> {
   id: number
 }
 
-const BASE_URL = '/api/management/countries'
+const BASE_URL = '/api/management/countries/'
 
 export const CountriesService = {
   getAll: async () => {
@@ -39,29 +39,53 @@ export const CountriesService = {
   },
 
   getById: async (id: number) => {
-    logApiCall('GET', `${BASE_URL}/${id}`)
-    const response = await apiClient.get<Country>(`${BASE_URL}/${id}`)
+    const url = `${BASE_URL.slice(0, -1)}/${id}/`
+    logApiCall('GET', url)
+    const response = await apiClient.get<Country>(url)
     console.log('📥 Response:', response.data)
     return response
   },
 
   create: async (data: CreateCountryDto) => {
-    logApiCall('POST', BASE_URL, data)
-    const response = await apiClient.post<Country>(BASE_URL, data)
-    console.log('📥 Response:', response.data)
-    return response
+    try {
+      // Ensure data is properly formatted
+      const formattedData = {
+        name: String(data.name).trim(),
+        code: String(data.code).trim(),
+        is_active: Boolean(data.is_active ?? true)
+      }
+      
+      logApiCall('POST', BASE_URL, formattedData)
+      const response = await apiClient.post<Country>(BASE_URL, formattedData)
+      
+      if (response.data) {
+        console.log('📥 Response:', response.data)
+      }
+      
+      return response
+    } catch (error: any) {
+      console.error('❌ Create Country Error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        originalError: error
+      })
+      throw error
+    }
   },
 
   update: async ({ id, ...data }: UpdateCountryDto) => {
-    logApiCall('PATCH', `${BASE_URL}/${id}`, data)
-    const response = await apiClient.patch<Country>(`${BASE_URL}/${id}`, data)
+    const url = `${BASE_URL.slice(0, -1)}/${id}/`
+    logApiCall('PATCH', url, data)
+    const response = await apiClient.patch<Country>(url, data)
     console.log('📥 Response:', response.data)
     return response
   },
 
   delete: async (id: number) => {
-    logApiCall('DELETE', `${BASE_URL}/${id}`)
-    const response = await apiClient.delete<void>(`${BASE_URL}/${id}`)
+    const url = `${BASE_URL.slice(0, -1)}/${id}/`
+    logApiCall('DELETE', url)
+    const response = await apiClient.delete<void>(url)
     console.log('📥 Response: Delete successful')
     return response
   },
