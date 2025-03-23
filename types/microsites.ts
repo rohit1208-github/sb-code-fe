@@ -34,4 +34,13 @@ export interface Microsite {
   updated_at: string
 }
 
+export interface CreateMicrositeDto {
+  name: string
+  slug: string
+  branches: number[]
+  is_active: boolean
+  has_language_switcher: boolean
+  secondary_language: string | null
+}
+
 export type MicrositeResponse = Microsite[] 

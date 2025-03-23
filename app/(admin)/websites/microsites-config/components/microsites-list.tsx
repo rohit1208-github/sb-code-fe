@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { AddMicrositeDialog } from './add-microsite-dialog'
 
 const columns = [
   {
@@ -137,26 +138,7 @@ export function MicrositesList() {
           }}
           className="max-w-sm"
         />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button 
-              className="flex items-center gap-2"
-              onClick={() => console.log('➕ [MicrositesList] Add microsite button clicked')}
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add Microsite
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Microsite</DialogTitle>
-              <DialogDescription>
-                Configure a new microsite for your branches.
-              </DialogDescription>
-            </DialogHeader>
-            {/* Add microsite creation form here */}
-          </DialogContent>
-        </Dialog>
+        <AddMicrositeDialog />
       </div>
 
       <DataTable
