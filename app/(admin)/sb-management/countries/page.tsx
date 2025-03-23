@@ -16,6 +16,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
 export default function CountriesPage() {
   const router = useRouter()
   const { toast } = useToast()
@@ -86,7 +94,7 @@ export default function CountriesPage() {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Countries</CardTitle>
         <Button
-          onClick={() => router.push('/admin/sb-management/countries/new')}
+          onClick={() => router.push('/(admin)/sb-management/countries/new')}
         >
           Add Country
         </Button>
@@ -98,6 +106,8 @@ export default function CountriesPage() {
               <TableHead>Name</TableHead>
               <TableHead>Code</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Created At</TableHead>
+              <TableHead>Updated At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -109,20 +119,22 @@ export default function CountriesPage() {
                 <TableCell>
                   <span
                     className={`px-2 py-1 rounded text-xs ${
-                      country.isActive
+                      country.is_active
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}
                   >
-                    {country.isActive ? 'Active' : 'Inactive'}
+                    {country.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </TableCell>
+                <TableCell>{formatDate(country.created_at)}</TableCell>
+                <TableCell>{formatDate(country.updated_at)}</TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      router.push(`/admin/sb-management/countries/${country.id}`)
+                      router.push(`/(admin)/sb-management/countries/${country.id}`)
                     }
                   >
                     Edit
@@ -140,7 +152,7 @@ export default function CountriesPage() {
             ))}
             {!countries?.length && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center">
+                <TableCell colSpan={6} className="text-center">
                   No countries found
                 </TableCell>
               </TableRow>
