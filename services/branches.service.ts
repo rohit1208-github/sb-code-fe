@@ -1,75 +1,57 @@
-import api from '@/lib/api'
+import { apiClient } from "@/lib/api"
+import { API_CONFIG } from "@/lib/api-config"
+import type { Branch } from "@/types/api"
 
-export interface Branch {
-  id: string
+const BASE_URL = API_CONFIG.ENDPOINTS.BRANCHES
+
+export interface CreateBranchDto {
   name: string
-  countryId: string
+  country: number
   address: string
-  location: {
-    lat: number
-    lng: number
-  }
-  operatingHours: {
-    day: string
-    open: string
-    close: string
-  }[]
-  contactInfo: {
-    phone: string
-    email: string
-  }
-  images: string[]
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
+  phone: string
+  email: string
+  is_active: boolean
+  has_online_ordering: boolean
 }
 
-export interface CreateBranchInput {
-  name: string
-  countryId: string
-  address: string
-  location: {
-    lat: number
-    lng: number
-  }
-  operatingHours: {
-    day: string
-    open: string
-    close: string
-  }[]
-  contactInfo: {
-    phone: string
-    email: string
-  }
-  images?: string[]
-}
-
-export interface UpdateBranchInput extends Partial<CreateBranchInput> {
-  id: string
+export interface UpdateBranchDto extends CreateBranchDto {
+  id: number
 }
 
 export const BranchesService = {
-  async list() {
-    const response = await api.get<Branch[]>('/branches')
-    return response.data
+  getAll: async () => {
+    console.log("Fetching all branches")
+    const response = await apiClient.get<Branch[]>(BASE_URL)
+    return response
   },
 
-  async getById(id: string) {
-    const response = await api.get<Branch>(`/branches/${id}`)
-    return response.data
+  create: async (data: CreateBranchDto) => {
+    try {
+      console.log("Creating new branch with data:", JSON.stringify(data, null, 2))
+      const response = await apiClient.post<Branch>(BASE_URL, data)
+      console.log("Create branch response:", response)
+      return response
+    } catch (error: any) {
+      console.error("Create branch error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      })
+      throw error
+    }
   },
 
-  async create(data: CreateBranchInput) {
-    const response = await api.post<Branch>('/branches', data)
-    return response.data
+  update: async ({ id, ...data }: UpdateBranchDto) => {
+    console.log(`Updating branch ${id} with data:`, data)
+    const url = `${BASE_URL}${id}/`
+    const response = await apiClient.put<Branch>(url, data)
+    return response
   },
 
-  async update(data: UpdateBranchInput) {
-    const response = await api.patch<Branch>(`/branches/${data.id}`, data)
-    return response.data
+  delete: async (id: number) => {
+    console.log(`Deleting branch ${id}`)
+    const url = `${BASE_URL}${id}/`
+    const response = await apiClient.delete(url)
+    return response
   },
-
-  async delete(id: string) {
-    await api.delete(`/branches/${id}`)
-  }
-} 
+}

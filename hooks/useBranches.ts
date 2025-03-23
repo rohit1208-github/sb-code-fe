@@ -1,58 +1,51 @@
+"use client"
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { BranchesService, Branch, CreateBranchInput, UpdateBranchInput } from '@/services/branches.service'
+import { BranchesService, type CreateBranchDto, type UpdateBranchDto } from '@/services/branches.service'
 import { toast } from 'sonner'
+import type { Branch } from "@/types/api"
 
 export function useBranches() {
   const queryClient = useQueryClient()
+  const QUERY_KEY = ["branches"]
 
-  const branches = useQuery({
-    queryKey: ['branches'],
-    queryFn: () => BranchesService.list()
+  const { data: branches = [], isLoading } = useQuery<Branch[]>({
+    queryKey: QUERY_KEY,
+    queryFn: async () => {
+      const response = await BranchesService.getAll()
+      return response.data
+    },
   })
 
-  const createBranch = useMutation({
-    mutationFn: (data: CreateBranchInput) => BranchesService.create(data),
+  const createMutation = useMutation({
+    mutationFn: BranchesService.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['branches'] })
-      toast.success('Branch created successfully')
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to create branch: ${error.message}`)
-    }
   })
 
-  const updateBranch = useMutation({
-    mutationFn: (data: UpdateBranchInput) => BranchesService.update(data),
+  const updateMutation = useMutation({
+    mutationFn: BranchesService.update,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['branches'] })
-      toast.success('Branch updated successfully')
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to update branch: ${error.message}`)
-    }
   })
 
-  const deleteBranch = useMutation({
-    mutationFn: (id: string) => BranchesService.delete(id),
+  const deleteMutation = useMutation({
+    mutationFn: BranchesService.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['branches'] })
-      toast.success('Branch deleted successfully')
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete branch: ${error.message}`)
-    }
   })
 
   return {
-    branches: branches.data ?? [],
-    isLoading: branches.isLoading,
-    isError: branches.isError,
-    error: branches.error,
-    createBranch: createBranch.mutate,
-    updateBranch: updateBranch.mutate,
-    deleteBranch: deleteBranch.mutate,
-    isCreating: createBranch.isPending,
-    isUpdating: updateBranch.isPending,
-    isDeleting: deleteBranch.isPending
+    branches,
+    isLoading,
+    createBranch: createMutation.mutateAsync,
+    updateBranch: updateMutation.mutateAsync,
+    deleteBranch: deleteMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending
   }
 } 

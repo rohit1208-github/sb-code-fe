@@ -3,6 +3,8 @@ export const API_CONFIG = {
   ENDPOINTS: {
     LOGIN: '/api/token/',
     REFRESH: '/api/token/refresh/',
+    COUNTRIES: '/api/management/countries/',
+    BRANCHES: '/api/management/branches/',
   },
 } as const
 

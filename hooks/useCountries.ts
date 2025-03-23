@@ -14,7 +14,7 @@ interface ApiError {
 export function useCountries() {
   const queryClient = useQueryClient()
 
-  const { data: countries, isLoading, error } = useQuery<Country[], AxiosError<ApiError>>({
+  const { data: countries = [], isLoading, error } = useQuery<Country[], AxiosError<ApiError>>({
     queryKey: [QUERY_KEY],
     queryFn: async () => {
       const response = await CountriesService.getAll()
