@@ -1,6 +1,5 @@
 # Branch Management Integration
 
-
 ## Overview
 
 This document details the branch management implementation for the SB Admin Console, following the same architecture patterns used in the countries management section. The implementation provides a secure, type-safe way to interact with the Django backend API for managing restaurant branches.
@@ -17,9 +16,12 @@ services/
 ├── branches.service.ts    # Branches API service
 hooks/
 ├── useBranches.ts        # React Query hook for branches
+├── useCountries.ts       # React Query hook for countries data
 components/
 ├── branches/
-│   └── branches-table.tsx # Branch listing and management table
+│   ├── branches-table.tsx # Branch listing and management table
+│   ├── branch-dialog.tsx  # Add/Edit branch dialog
+│   └── delete-branch-dialog.tsx # Delete confirmation dialog
 types/
 └── api.ts                # Shared API types including Branch interface
 ```
@@ -58,12 +60,60 @@ export interface Branch {
 
 ### 3. Service Layer Implementation
 
-The current service layer (`services/branches.service.ts`) implements the GET functionality for branches:
+The service layer (`services/branches.service.ts`) implements full CRUD functionality:
 
 ```typescript
+export interface CreateBranchDto {
+  name: string;
+  country: number;
+  address: string;
+  phone: string;
+  email: string;
+  is_active: boolean;
+  has_online_ordering: boolean;
+}
+
+export interface UpdateBranchDto extends CreateBranchDto {
+  id: number;
+}
+
 export const BranchesService = {
   getAll: async () => {
+    console.log("Fetching all branches");
     const response = await apiClient.get<Branch[]>(BASE_URL);
+    return response;
+  },
+
+  create: async (data: CreateBranchDto) => {
+    try {
+      console.log(
+        "Creating new branch with data:",
+        JSON.stringify(data, null, 2)
+      );
+      const response = await apiClient.post<Branch>(BASE_URL, data);
+      console.log("Create branch response:", response);
+      return response;
+    } catch (error: any) {
+      console.error("Create branch error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+      throw error;
+    }
+  },
+
+  update: async ({ id, ...data }: UpdateBranchDto) => {
+    console.log(`Updating branch ${id} with data:`, data);
+    const url = `${BASE_URL}${id}/`;
+    const response = await apiClient.put<Branch>(url, data);
+    return response;
+  },
+
+  delete: async (id: number) => {
+    console.log(`Deleting branch ${id}`);
+    const url = `${BASE_URL}${id}/`;
+    const response = await apiClient.delete(url);
     return response;
   },
 };
@@ -71,7 +121,7 @@ export const BranchesService = {
 
 ### 4. React Query Integration
 
-The `useBranches` hook (`hooks/useBranches.ts`) provides a type-safe interface for managing branch data:
+The `useBranches` hook provides a type-safe interface for managing branch data with proper cache invalidation:
 
 ```typescript
 export function useBranches() {
@@ -86,193 +136,186 @@ export function useBranches() {
     },
   });
 
+  const createMutation = useMutation({
+    mutationFn: BranchesService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: BranchesService.update,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: BranchesService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+  });
+
   return {
     branches,
     isLoading,
+    createBranch: createMutation.mutateAsync,
+    updateBranch: updateMutation.mutateAsync,
+    deleteBranch: deleteMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
   };
 }
 ```
 
 ### 5. UI Components
 
-#### 5.1 Branches Table (`components/branches/branches-table.tsx`)
+#### 5.1 Branch Dialog Component
 
-The table component implements:
+The `BranchDialog` component implements:
+
+- Form validation using Zod schema
+- Country selection dropdown with data from `useCountries` hook
+- Error handling with field-level validation
+- Success notifications using Sonner
+- Loading states for API operations
+- Proper form reset on success
+- Detailed error logging
+
+#### 5.2 Delete Confirmation Dialog
+
+The `DeleteBranchDialog` component provides:
+
+- User-friendly confirmation UI
+- Error handling
+- Success notifications
+- Loading states during deletion
+
+#### 5.3 Branches Table
+
+The `BranchesTable` component features:
 
 - Responsive layout using Shadcn UI
 - Loading and empty states
 - Status badges for active/inactive states
 - Online ordering status display
-- Action buttons for edit and delete operations (placeholders)
-
-#### 5.2 Main Page (`app/(admin)/sb-management/branches/page.tsx`)
-
-The page component provides:
-
-- Branch listing with proper data fetching
-- "Add Branch" button (placeholder)
-- Loading state handling
-- Error boundary support
-
-## Planned CRUD Operations
-
-### 1. Create Branch Operation
-
-Will implement POST endpoint integration:
-
-- Endpoint: `/api/management/branches/`
-- Method: POST
-- Authentication: Bearer token required
-
-#### 1.1 Service Layer Extension
-
-```typescript
-// To be implemented
-interface CreateBranchDto {
-  name: string;
-  country: number;
-  address: string;
-  phone: string;
-  email: string;
-  is_active: boolean;
-  has_online_ordering: boolean;
-}
-
-// Service method to be added
-create: async (data: CreateBranchDto) => {
-  const response = await apiClient.post<Branch>(BASE_URL, data);
-  return response;
-};
-```
-
-### 2. Update Branch Operation
-
-Will implement PUT endpoint integration:
-
-- Endpoint: `/api/management/branches/{id}/`
-- Method: PUT
-- Authentication: Bearer token required
-
-#### 2.1 Service Layer Extension
-
-```typescript
-// To be implemented
-interface UpdateBranchDto extends CreateBranchDto {
-  id: number;
-}
-
-// Service method to be added
-update: async ({ id, ...data }: UpdateBranchDto) => {
-  const response = await apiClient.put<Branch>(`${BASE_URL}${id}/`, data);
-  return response;
-};
-```
-
-### 3. Delete Branch Operation
-
-Will implement DELETE endpoint integration:
-
-- Endpoint: `/api/management/branches/{id}/`
-- Method: DELETE
-- Authentication: Bearer token required
-
-#### 3.1 Service Layer Extension
-
-```typescript
-// Service method to be added
-delete: async (id: number) => {
-  const response = await apiClient.delete(`${BASE_URL}${id}/`)
-  return response
-}
-```
-
-## Next Steps
-
-### 1. Create Branch Dialog
-
-Will implement:
-
-- Form with validation using Zod
-- Country selection dropdown
-- Error handling
-- Success notifications
-- Loading states
-
-### 2. Edit Branch Dialog
-
-Will implement:
-
-- Pre-populated form with current branch data
-- Form validation
-- Error handling
-- Success notifications
-- Loading states
-
-### 3. Delete Confirmation
-
-Will implement:
-
-- Confirmation dialog using Shadcn UI
-- Error handling
-- Success notifications
-- Loading states
-
-### 4. Enhanced Error Handling
-
-Will implement:
-
-- Field-level validation errors
-- Network error handling
-- Proper error messages
-- Retry mechanisms
-
-### 5. Optimistic Updates
-
-Will implement:
-
-- Optimistic UI updates for better UX
-- Rollback on failure
-- Loading states during operations
+- Integrated action buttons for edit and delete operations
+- Single "Add Branch" button with proper dialog integration
 
 ## Integration Checklist
 
-When implementing the remaining CRUD operations:
+### 1. API Integration
 
-1. **API Integration**:
+- [x] Add DTOs for create/update operations
+- [x] Implement service methods for CRUD operations
+- [x] Add proper error handling with detailed logging
+- [x] Add response type validation
+- [x] Implement country selection integration
 
-   - [ ] Add DTOs for create/update operations
-   - [ ] Implement service methods
-   - [ ] Add proper error handling
-   - [ ] Add response type validation
+### 2. React Query Integration
 
-2. **React Query Integration**:
+- [x] Add mutations for create/update/delete
+- [x] Implement proper cache invalidation
+- [x] Add loading states
+- [x] Implement error handling
+- [x] Add success notifications
 
-   - [ ] Add mutations for create/update/delete
-   - [ ] Implement proper cache invalidation
-   - [ ] Add optimistic updates
-   - [ ] Handle loading states
+### 3. UI Components
 
-3. **UI Components**:
+- [x] Create branch dialog component with form validation
+- [x] Edit branch dialog with pre-populated data
+- [x] Delete confirmation dialog
+- [x] Loading states for all operations
+- [x] Error message display
+- [x] Single "Add Branch" button implementation
+- [x] Proper dialog triggers and state management
 
-   - [ ] Create branch dialog component
-   - [ ] Edit branch dialog component
-   - [ ] Delete confirmation dialog
-   - [ ] Loading states for all operations
-   - [ ] Error message display
+### 4. Enhanced Error Handling
 
-4. **Testing**:
-   - [ ] Test all CRUD operations
-   - [ ] Test error scenarios
-   - [ ] Test loading states
-   - [ ] Test optimistic updates
+- [x] Field-level validation errors
+- [x] Network error handling
+- [x] Proper error messages
+- [x] Console logging for debugging
+
+### 5. Form Validation
+
+- [x] Zod schema implementation
+- [x] Required field validation
+- [x] Email format validation
+- [x] Country selection validation
+- [x] Form state management
+
+## Technical Details
+
+### 1. Form Validation Schema
+
+```typescript
+const branchFormSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  country: z.number().int().positive("Please select a country"),
+  address: z.string().min(5, "Address must be at least 5 characters"),
+  phone: z.string().min(5, "Phone must be at least 5 characters"),
+  email: z.string().email("Invalid email address"),
+  is_active: z.boolean(),
+  has_online_ordering: z.boolean(),
+});
+```
+
+### 2. API Response Handling
+
+- Success responses trigger cache invalidation
+- Error responses include:
+  - Field-level validation errors
+  - Network errors
+  - Server errors
+  - Detailed error logging
+
+### 3. State Management
+
+- Form state managed by `react-hook-form`
+- API state managed by `@tanstack/react-query`
+- UI state (dialogs, loading) managed by local React state
+- Country data managed by separate `useCountries` hook
+
+### 4. Performance Optimizations
+
+- Proper cache invalidation strategies
+- Loading states to prevent double submissions
+- Optimized re-renders using proper React patterns
+- Type-safe implementations throughout
+
+### 5. Security Considerations
+
+- API calls require authentication
+- Form data validation on both client and server
+- Proper error handling for unauthorized actions
+- Secure data transmission
+
+## Next Steps
+
+### 1. Additional Features
+
+- [ ] Add sorting functionality to the table
+- [ ] Implement pagination
+- [ ] Add search functionality
+- [ ] Implement bulk operations
+
+### 2. Performance Enhancements
+
+- [ ] Implement request debouncing
+- [ ] Add infinite scrolling
+- [ ] Optimize bundle size
+- [ ] Add performance monitoring
+
+### 3. UX Improvements
+
+- [ ] Add keyboard navigation
+- [ ] Implement drag-and-drop functionality
+- [ ] Add bulk edit capabilities
+- [ ] Enhance mobile responsiveness
 
 ## Conclusion
 
-The current implementation provides a solid foundation for branch management with:
-
-- Type-safe API integration
-- Modern UI components
-- Proper loading states
-- Error handling
-
-The next phase will focus on implementing the remaining CRUD operations following the same patterns used in the countries management section, ensuring a consistent and robust user experience.
+The branch management implementation now provides a robust, type-safe, and user-friendly interface for managing restaurant branches. The implementation follows best practices for React and TypeScript development, ensuring maintainability and scalability.

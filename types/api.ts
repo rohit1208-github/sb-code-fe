@@ -10,4 +10,4 @@ export interface Branch {
   has_online_ordering: boolean
   created_at: string
   updated_at: string
-} 
+}
