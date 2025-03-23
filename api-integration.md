@@ -276,6 +276,156 @@ interface CreateCountryDto {
 }
 ```
 
+#### 7.3 GET /api/management/countries/{id}/
+
+- **Purpose**: Fetch a specific country by ID
+- **Authentication**: Bearer token required
+- **Parameters**:
+  - `id`: INTEGER - The ID of the country
+- **Response**: Country object
+
+#### 7.4 PATCH /api/management/countries/{id}/
+
+- **Purpose**: Update a specific country
+- **Authentication**: Bearer token required
+- **Parameters**:
+  - `id`: INTEGER - The ID of the country
+- **Request Body**: Partial<CreateCountryDto>
+- **Response**: Updated Country object
+
+#### 7.5 DELETE /api/management/countries/{id}/
+
+- **Purpose**: Delete a specific country
+- **Authentication**: Bearer token required
+- **Parameters**:
+  - `id`: INTEGER - The ID of the country
+- **Response**: No content (204)
+- **Error Responses**:
+  - 404: Country not found
+  - 401: Unauthorized
+  - 403: Forbidden
+
+### URL Handling Implementation
+
+The CountriesService implements careful URL handling to ensure proper trailing slashes as required by the Django backend:
+
+```typescript
+const BASE_URL = "/api/management/countries/"; // Note trailing slash
+
+export const CountriesService = {
+  // Collection endpoints (maintain trailing slash)
+  getAll: async () => {
+    logApiCall("GET", BASE_URL);
+    const response = await apiClient.get<Country[]>(BASE_URL);
+    return response;
+  },
+
+  create: async (data: CreateCountryDto) => {
+    logApiCall("POST", BASE_URL, data);
+    const response = await apiClient.post<Country>(BASE_URL, data);
+    return response;
+  },
+
+  // Resource endpoints (ID-based, maintain trailing slash after ID)
+  getById: async (id: number) => {
+    const url = `${BASE_URL.slice(0, -1)}/${id}/`;
+    const response = await apiClient.get<Country>(url);
+    return response;
+  },
+
+  update: async ({ id, ...data }: UpdateCountryDto) => {
+    const url = `${BASE_URL.slice(0, -1)}/${id}/`;
+    const response = await apiClient.patch<Country>(url, data);
+    return response;
+  },
+
+  delete: async (id: number) => {
+    const url = `${BASE_URL.slice(0, -1)}/${id}/`;
+    const response = await apiClient.delete<void>(url);
+    return response;
+  },
+};
+```
+
+Key URL formatting rules:
+
+1. Collection endpoints (no ID):
+
+   - Always include trailing slash
+   - Example: `/api/management/countries/`
+
+2. Resource endpoints (with ID):
+   - Remove BASE_URL trailing slash before adding ID
+   - Add trailing slash after ID
+   - Example: `/api/management/countries/10/`
+
+This implementation ensures compatibility with Django's URL handling requirements while maintaining clean and consistent API integration.
+
+### React Query Integration
+
+The delete functionality is integrated into the useCountries hook using React Query's mutation capabilities:
+
+```typescript
+const deleteMutation = useMutation({
+  mutationFn: (id: number) => CountriesService.delete(id),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
+  },
+});
+
+// Usage in components
+const { deleteCountry, isDeleting } = useCountries();
+
+const handleDelete = async (id: number) => {
+  if (window.confirm("Are you sure you want to delete this country?")) {
+    try {
+      await deleteCountry(id);
+      toast({
+        title: "Success",
+        description: "Country deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete country",
+      });
+    }
+  }
+};
+```
+
+This implementation:
+
+- Handles optimistic updates
+- Provides loading states
+- Automatically refreshes the countries list after deletion
+- Integrates with the UI's toast notification system
+
+### Error Handling
+
+The service implements comprehensive error handling:
+
+1. Network Errors:
+
+   - Connection issues
+   - Timeout errors
+   - Server unavailable
+
+2. API Errors:
+
+   - 404: Country not found
+   - 401: Unauthorized
+   - 403: Forbidden
+   - 400: Bad request
+
+3. Validation Errors:
+   - Invalid ID format
+   - Missing required fields
+   - Data type mismatches
+
+Each error is logged with detailed information and propagated to the UI layer for appropriate user feedback.
+
 ### 8. Error Handling
 
 Enhanced error handling for form submissions:
