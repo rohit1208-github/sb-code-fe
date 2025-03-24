@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { PlusIcon } from '@radix-ui/react-icons'
 import { useRouter } from 'next/navigation'
 import { PageHeader } from '@/components/ui/page-header'
+import { Suspense } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface StaffMember {
   id: string
@@ -100,11 +102,37 @@ export default function StaffPage() {
         </Button>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        onRowClick={(row) => router.push(`/sb-management/staff/${row.id}`)}
-      />
+      <Suspense fallback={<StaffTableSkeleton />}>
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          onRowClick={(row) => router.push(`/sb-management/staff/${row.id}`)}
+          searchKey="name"
+        />
+      </Suspense>
+    </div>
+  )
+}
+
+function StaffTableSkeleton() {
+  return (
+    <div className="rounded-md border">
+      <div className="border-b bg-muted/50 p-4">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-4 w-[250px]" />
+          <Skeleton className="h-4 w-[200px]" />
+          <Skeleton className="h-4 w-[150px]" />
+        </div>
+      </div>
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="border-b p-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+            <Skeleton className="h-4 w-[150px]" />
+          </div>
+        </div>
+      ))}
     </div>
   )
 } 

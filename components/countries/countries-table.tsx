@@ -13,7 +13,7 @@ import { useCountries } from "@/hooks/useCountries"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { PencilIcon, TrashIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { CountryDialog } from "./add-country-dialog"
 
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -26,7 +26,6 @@ function formatDate(dateString: string) {
 export function CountriesTable() {
   const { toast } = useToast()
   const { countries, isLoading, error, deleteCountry, isDeleting } = useCountries()
-  const router = useRouter()
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this country?')) {
@@ -88,13 +87,15 @@ export function CountriesTable() {
               <TableCell>{formatDate(country.updated_at)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={() => router.push(`/countries/${country.id}/edit`)}
-                  >
-                    <PencilIcon className="h-4 w-4 text-yellow-500" />
-                  </Button>
+                  <CountryDialog
+                    mode="edit"
+                    country={country}
+                    trigger={
+                      <Button variant="outline" size="icon">
+                        <PencilIcon className="h-4 w-4 text-yellow-500" />
+                      </Button>
+                    }
+                  />
                   <Button
                     variant="outline"
                     size="icon"
