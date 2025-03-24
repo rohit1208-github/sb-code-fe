@@ -82,9 +82,10 @@ export default function AdminLayout({
       {/* Desktop Sidebar */}
       <div 
         className={cn(
-          "hidden lg:block border-r bg-card overflow-hidden",
+          "hidden lg:block border-r bg-card",
           "hover:w-[280px] w-[80px] group",
-          "transition-all duration-500 ease-in-out"
+          "transition-all duration-500 ease-in-out",
+          "fixed top-0 left-0 h-screen z-30"
         )}
       >
         <nav className="flex-1 space-y-2 p-4">
@@ -93,7 +94,7 @@ export default function AdminLayout({
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto lg:pl-[80px] lg:group-hover:pl-[280px] transition-all duration-500 ease-in-out">
         <div className="container py-6">
           {children}
         </div>
