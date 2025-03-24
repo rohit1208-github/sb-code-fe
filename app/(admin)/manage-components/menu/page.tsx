@@ -1,7 +1,13 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -14,6 +20,7 @@ import { MenuDialog } from './components/menu-dialog'
 import { useMenu } from '@/hooks/useMenu'
 import type { MenuItem } from '@/types/api'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PencilIcon, TrashIcon, PlusCircleIcon } from "@heroicons/react/24/outline"
 
 export default function MenuPage() {
   const { menuItems, isLoading, deleteMenuItem, isDeleting } = useMenu()
@@ -27,95 +34,116 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="p-8">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-2xl font-bold">Menu Management</CardTitle>
-          <MenuDialog mode="add" />
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                Menu Management
+              </CardTitle>
+              <CardDescription className="mt-2">
+                Manage your restaurant's menu items, prices, and availability
+              </CardDescription>
+            </div>
+            <MenuDialog
+              mode="add"
+              trigger={
+                <Button className="bg-primary hover:bg-primary/90 text-white">
+                  <PlusCircleIcon className="h-5 w-5 mr-2" />
+                  Add Menu Item
+                </Button>
+              }
+            />
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Currency</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          <div className="rounded-lg border shadow-sm">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Name</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Description</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Price</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Currency</th>
+                  <th className="text-left p-4 text-sm font-medium text-muted-foreground">Status</th>
+                  <th className="text-right p-4 text-sm font-medium text-muted-foreground">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
                 {isLoading ? (
                   // Loading skeleton
                   Array.from({ length: 5 }).map((_, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
+                    <tr key={index} className="hover:bg-muted/50 transition-colors">
+                      <td className="p-4 text-sm font-medium text-gray-900">
                         <Skeleton className="h-4 w-[100px]" />
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-sm text-gray-600">
                         <Skeleton className="h-4 w-[200px]" />
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-sm text-gray-600">
                         <Skeleton className="h-4 w-[80px]" />
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-sm text-gray-600">
                         <Skeleton className="h-4 w-[60px]" />
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4">
                         <Skeleton className="h-4 w-[60px]" />
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="p-4 text-right">
                         <Skeleton className="h-4 w-[100px]" />
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))
                 ) : menuItems?.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.description}</TableCell>
-                    <TableCell>{item.price}</TableCell>
-                    <TableCell>{item.currency_display}</TableCell>
-                    <TableCell>
+                  <tr key={item.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="p-4 text-sm font-medium text-gray-900">{item.name}</td>
+                    <td className="p-4 text-sm text-gray-600">{item.description}</td>
+                    <td className="p-4 text-sm text-gray-600">{item.price}</td>
+                    <td className="p-4 text-sm text-gray-600">{item.currency_display}</td>
+                    <td className="p-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           item.is_active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20'
+                            : 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20'
                         }`}
                       >
                         {item.is_active ? 'Active' : 'Inactive'}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <MenuDialog
-                        mode="edit"
-                        menuItem={item}
-                        trigger={
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="mr-2"
-                          >
-                            Edit
-                          </Button>
-                        }
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => handleDelete(item.id)}
-                        disabled={isDeleting}
-                      >
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <MenuDialog
+                          mode="edit"
+                          menuItem={item}
+                          trigger={
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                          }
+                        />
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 w-8 p-0 text-gray-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDelete(item.id)}
+                          disabled={isDeleting}
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
