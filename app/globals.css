@@ -4,67 +4,69 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Dark theme by default */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Cards - Rich dark background with slight warmth */
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover - Darker than background for depth */
+    --popover: 240 10% 2%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Deep burgundy */
+    --primary: 345 85% 40%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Deep blue-gray */
+    --secondary: 240 25% 20%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Dark gray with slight warmth */
+    --muted: 240 15% 15%;
+    --muted-foreground: 240 5% 65%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Rich gold */
+    --accent: 35 90% 50%;
+    --accent-foreground: 240 6% 10%;
 
+    /* Destructive - Vibrant red */
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    /* Border & Input - Subtle dark lines */
+    --border: 240 15% 12%;
+    --input: 240 15% 12%;
 
-    --ring: 222.2 84% 4.9%;
+    /* Ring - Matching primary */
+    --ring: 345 85% 40%;
 
     --radius: 0.5rem;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-
-    --ring: 212.7 26.8% 83.9%;
+  .light {
+    /* Light mode as secondary theme */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 345 85% 40%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 5% 93%;
+    --secondary-foreground: 240 5% 25%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 35 90% 50%;
+    --accent-foreground: 240 6% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 90%;
+    --input: 240 5% 90%;
+    --ring: 345 85% 40%;
   }
 }
 
@@ -74,5 +76,57 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    @apply bg-gradient-to-br from-primary/90 via-primary to-primary/90;
+  }
+  
+  .gradient-secondary {
+    @apply bg-gradient-to-br from-secondary/90 via-secondary to-secondary/90;
+  }
+  
+  .gradient-accent {
+    @apply bg-gradient-to-br from-accent/90 via-accent to-accent/90;
+  }
+
+  .gradient-card {
+    @apply bg-gradient-to-br from-card/95 via-card to-card/95 backdrop-blur-sm;
+  }
+
+  .gradient-sidebar {
+    @apply bg-gradient-to-b from-secondary/50 via-secondary/30 to-secondary/50 backdrop-blur-sm;
+  }
+
+  .glass-effect {
+    @apply bg-white/5 backdrop-blur-lg backdrop-saturate-150;
+  }
+
+  .hover-glass {
+    @apply hover:bg-white/10 transition-colors duration-500 ease-in-out;
+  }
+
+  .active-glass {
+    @apply bg-white/15;
+  }
+
+  /* Enhanced text styles */
+  .text-enhanced {
+    @apply font-semibold tracking-tight;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary;
+  }
+
+  .heading-enhanced {
+    @apply text-enhanced text-2xl md:text-3xl;
+  }
+
+  .subheading-enhanced {
+    @apply text-enhanced text-lg md:text-xl text-muted-foreground;
   }
 } 

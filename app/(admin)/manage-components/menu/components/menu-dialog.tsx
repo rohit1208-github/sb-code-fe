@@ -72,7 +72,7 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="outline">
+          <Button variant={mode === 'add' ? 'success' : 'outline'}>
             {mode === 'add' ? 'Add Menu Item' : 'Edit Menu Item'}
           </Button>
         )}
@@ -171,7 +171,7 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" variant={mode === 'add' ? 'success' : 'default'}>
                 {mode === 'add' ? 'Add Item' : 'Save Changes'}
               </Button>
             </div>

@@ -19,7 +19,7 @@ export function AddMicrositeDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant="success">
           <PlusIcon className="h-4 w-4 mr-2" />
           Add Microsite
         </Button>

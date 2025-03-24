@@ -150,7 +150,11 @@ export function BranchDialog({ mode, branch, trigger }: BranchDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger}
+        {trigger || (
+          <Button variant={mode === 'add' ? 'success' : 'outline'}>
+            {mode === 'add' ? 'Add Branch' : 'Edit Branch'}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -279,7 +283,9 @@ export function BranchDialog({ mode, branch, trigger }: BranchDialogProps) {
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" variant={mode === 'add' ? 'success' : 'default'}>
+                {mode === 'add' ? 'Add Branch' : 'Save changes'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

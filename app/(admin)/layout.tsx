@@ -35,14 +35,15 @@ function NavLink({ href, children, icon: Icon, collapsed }: { href: string; chil
       variant="ghost"
       className={cn(
         "w-full justify-start gap-2 relative overflow-hidden",
-        isActive && "bg-accent text-accent-foreground"
+        isActive && "bg-accent text-accent-foreground",
+        collapsed && "justify-center group-hover:justify-start"
       )}
     >
       <Link 
         href={href} 
         className={cn(
-          "flex items-center gap-2 transition-transform duration-300",
-          collapsed ? "translate-x-[30%] group-hover:translate-x-0" : "translate-x-0"
+          "flex items-center gap-2 transition-all duration-300",
+          collapsed ? "justify-center group-hover:justify-start" : "justify-start"
         )}
       >
         <Icon className="h-4 w-4 shrink-0" />
@@ -81,8 +82,9 @@ export default function AdminLayout({
       {/* Desktop Sidebar */}
       <div 
         className={cn(
-          "hidden lg:block border-r bg-card overflow-hidden transition-all duration-300",
-          "hover:w-[280px] w-[80px] group"
+          "hidden lg:block border-r bg-card overflow-hidden",
+          "hover:w-[280px] w-[80px] group",
+          "transition-all duration-500 ease-in-out"
         )}
       >
         <nav className="flex-1 space-y-2 p-4">

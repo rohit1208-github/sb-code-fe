@@ -7,14 +7,7 @@ export default function BranchesPage() {
   const { branches = [], isLoading } = useBranches()
 
   return (
-    <div className="space-y-4 p-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Branches</h1>
-        <p className="text-muted-foreground">
-          Manage your restaurant branches here
-        </p>
-      </div>
-
+    <div className="mt-8 p-8">
       <BranchesTable branches={branches} isLoading={isLoading} />
     </div>
   )

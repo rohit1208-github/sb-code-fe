@@ -167,7 +167,7 @@ export function CountryDialog({ mode, country, trigger }: CountryDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="outline">
+          <Button variant={mode === 'add' ? 'success' : 'outline'}>
             {mode === 'edit' ? 'Edit Country' : 'Add Country'}
           </Button>
         )}
@@ -231,6 +231,7 @@ export function CountryDialog({ mode, country, trigger }: CountryDialogProps) {
             <DialogFooter>
               <Button 
                 type="submit" 
+                variant={mode === 'add' ? 'success' : 'default'}
                 disabled={createMutation.isPending || updateMutation.isPending}
               >
                 {createMutation.isPending || updateMutation.isPending
