@@ -17,6 +17,10 @@ export default function QueryProvider({ children }: QueryProviderProps) {
             staleTime: 60 * 1000, // 1 minute
             refetchOnWindowFocus: false,
             retry: 1,
+            refetchOnMount: false,
+          },
+          mutations: {
+            retry: 1,
           },
         },
       })
@@ -25,7 +29,9 @@ export default function QueryProvider({ children }: QueryProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      {process.env.NODE_ENV === 'development' && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
     </QueryClientProvider>
   )
 } 

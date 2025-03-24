@@ -4,40 +4,46 @@
 
 @layer base {
   :root {
-    /* Dark theme by default */
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Light theme colors */
+    --background: 0 0% 100%; /* Pure white background */
+    --foreground: 240 10% 3.9%; /* Dark text for contrast */
+
+    /* Primary Colors */
+    --primary: 345 85% 40%; /* Keep burgundy for brand consistency */
+    --accent: 35 90% 50%; /* Keep gold for accents */
+    --secondary: 210 40% 96.1%; /* Light blue-gray */
+
+    /* UI Element Colors */
+    --card: 0 0% 100%; /* White card background */
+    --popover: 0 0% 99%; /* Slightly off-white for depth */
+    --muted: 210 40% 96.1%; /* Light muted gray */
+    --border: 214 32% 91%; /* Light borders */
+
+    /* Additional Light Theme Colors */
+    --subtle-bg: 210 40% 98%; /* Very light background for hover states */
+    --hover: 210 40% 96.1%; /* Slightly darker for hover effects */
+    --active: 210 40% 94%; /* Darker for active states */
 
     /* Cards - Rich dark background with slight warmth */
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 240 10% 3.9%;
 
     /* Popover - Darker than background for depth */
-    --popover: 240 10% 2%;
-    --popover-foreground: 0 0% 98%;
+    --popover-foreground: 240 10% 3.9%;
 
     /* Primary - Deep burgundy */
-    --primary: 345 85% 40%;
     --primary-foreground: 0 0% 98%;
 
     /* Secondary - Deep blue-gray */
-    --secondary: 240 25% 20%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary-foreground: 240 5% 25%;
 
     /* Muted - Dark gray with slight warmth */
-    --muted: 240 15% 15%;
     --muted-foreground: 240 5% 65%;
-
-    /* Accent - Rich gold */
-    --accent: 35 90% 50%;
-    --accent-foreground: 240 6% 10%;
 
     /* Destructive - Vibrant red */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Border & Input - Subtle dark lines */
-    --border: 240 15% 12%;
+    /* Input - Subtle dark lines */
     --input: 240 15% 12%;
 
     /* Ring - Matching primary */
@@ -93,7 +99,7 @@
   }
 
   .gradient-card {
-    @apply bg-gradient-to-br from-card/95 via-card to-card/95 backdrop-blur-sm;
+    @apply bg-gradient-to-br from-white/95 via-white to-white/95 backdrop-blur-sm;
   }
 
   .gradient-sidebar {
@@ -101,21 +107,20 @@
   }
 
   .glass-effect {
-    @apply bg-white/5 backdrop-blur-lg backdrop-saturate-150;
+    @apply bg-white/80 backdrop-blur-lg backdrop-saturate-150 border border-white/20;
   }
 
   .hover-glass {
-    @apply hover:bg-white/10 transition-colors duration-500 ease-in-out;
+    @apply hover:bg-secondary/50 transition-colors duration-200;
   }
 
   .active-glass {
-    @apply bg-white/15;
+    @apply bg-secondary/70;
   }
 
   /* Enhanced text styles */
   .text-enhanced {
-    @apply font-semibold tracking-tight;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    @apply font-semibold tracking-wide text-gray-900;
   }
 
   .text-gradient {
@@ -123,10 +128,38 @@
   }
 
   .heading-enhanced {
-    @apply text-enhanced text-2xl md:text-3xl;
+    @apply text-2xl sm:text-3xl font-bold tracking-tight text-gray-900;
   }
 
   .subheading-enhanced {
     @apply text-enhanced text-lg md:text-xl text-muted-foreground;
+  }
+
+  /* Status badges for light theme */
+  .status-badge {
+    @apply px-3 py-1.5 rounded-full text-xs font-medium;
+  }
+
+  .status-badge.active {
+    @apply bg-green-100 text-green-700;
+  }
+
+  .status-badge.inactive {
+    @apply bg-red-100 text-red-700;
+  }
+
+  /* Card enhancements for light theme */
+  .card-enhanced {
+    @apply mt-8 p-8 bg-white shadow-sm;
+  }
+
+  .card-enhanced .card-header {
+    @apply flex flex-row items-center justify-between;
+  }
+
+  .card-enhanced .card-title {
+    @apply heading-enhanced;
+    @apply bg-gradient-to-r from-primary via-primary to-primary;
+    @apply bg-clip-text text-transparent;
   }
 } 
