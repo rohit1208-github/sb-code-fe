@@ -5,6 +5,7 @@ export const API_CONFIG = {
     REFRESH: '/api/token/refresh/',
     COUNTRIES: '/api/management/countries/',
     BRANCHES: '/api/management/branches/',
+    DASHBOARD_STATS: '/api/analytics/dashboard-stats/',
   },
 } as const
 
