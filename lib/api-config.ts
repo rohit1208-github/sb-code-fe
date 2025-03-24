@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: 'http://192.168.0.239:8000',
+  BASE_URL: 'http://34.60.128.41:8000',
   ENDPOINTS: {
     LOGIN: '/api/token/',
     REFRESH: '/api/token/refresh/',
