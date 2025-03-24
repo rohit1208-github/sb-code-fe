@@ -23,48 +23,84 @@ import { Switch } from '@/components/ui/switch'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import { useMenu } from '@/hooks/useMenu'
+import type { MenuItem } from '@/types/api'
+import { toast } from '@/components/ui/use-toast'
 
 // Form schema - will be moved to separate file when implementing API
 const menuItemSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  price: z.number().min(0, 'Price must be positive'),
-  category: z.string().min(2, 'Category must be at least 2 characters'),
-  isActive: z.boolean().default(true),
+  price: z.string().min(1, 'Price is required'),
+  currency: z.string().default('USD'),
+  is_active: z.boolean().default(true),
+  microsite: z.number().default(0)
 })
 
 type MenuItemFormValues = z.infer<typeof menuItemSchema>
 
 interface MenuDialogProps {
   mode: 'add' | 'edit'
-  menuItem?: MenuItemFormValues
+  menuItem?: MenuItem
   trigger?: React.ReactNode
 }
 
 export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
   const [open, setOpen] = useState(false)
+  const { createMenuItem, updateMenuItem, isCreating, isUpdating } = useMenu()
 
   // Form setup with validation
   const form = useForm<MenuItemFormValues>({
     resolver: zodResolver(menuItemSchema),
-    defaultValues: mode === 'edit' && menuItem ? menuItem : {
-      name: '',
-      description: '',
-      price: 0,
-      category: '',
-      isActive: true,
-    },
+    defaultValues: mode === 'edit' && menuItem
+      ? {
+          name: menuItem.name,
+          description: menuItem.description,
+          price: menuItem.price,
+          currency: menuItem.currency,
+          is_active: menuItem.is_active,
+          microsite: menuItem.microsites[0] || 0
+        }
+      : {
+          name: '',
+          description: '',
+          price: '',
+          currency: 'USD',
+          is_active: true,
+          microsite: 0
+        },
   })
 
   // Form submission handler - will be updated with API integration
   const onSubmit = async (data: MenuItemFormValues) => {
     try {
-      // API integration will be added here
-      console.log('Form submitted:', data)
+      console.log('MenuDialog: Submitting form data:', data)
+      
+      if (mode === 'add') {
+        await createMenuItem(data)
+        console.log('MenuDialog: Successfully created menu item')
+        toast({
+          title: 'Success',
+          description: 'Menu item created successfully',
+        })
+      } else if (menuItem) {
+        await updateMenuItem({ id: menuItem.id, ...data })
+        console.log('MenuDialog: Successfully updated menu item')
+        toast({
+          title: 'Success',
+          description: 'Menu item updated successfully',
+        })
+      }
+      
       setOpen(false)
       form.reset()
     } catch (error) {
-      console.error('Error submitting form:', error)
+      console.error('MenuDialog: Error submitting form:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to save menu item. Please try again.',
+      })
     }
   }
 
@@ -126,7 +162,6 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
                       step="0.01"
                       placeholder="Enter price"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
@@ -135,12 +170,15 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
             />
             <FormField
               control={form.control}
-              name="category"
+              name="currency"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>Currency</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter category" {...field} />
+                    <Input
+                      placeholder="Enter currency (e.g., USD)"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -148,7 +186,26 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
             />
             <FormField
               control={form.control}
-              name="isActive"
+              name="microsite"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Microsite ID</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter microsite ID"
+                      {...field}
+                      value={0}
+                      disabled
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="is_active"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                   <div className="space-y-0.5">
@@ -171,8 +228,18 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant={mode === 'add' ? 'success' : 'default'}>
-                {mode === 'add' ? 'Add Item' : 'Save Changes'}
+              <Button
+                type="submit"
+                variant={mode === 'add' ? 'success' : 'default'}
+                disabled={isCreating || isUpdating}
+              >
+                {isCreating || isUpdating ? (
+                  'Loading...'
+                ) : mode === 'add' ? (
+                  'Add Item'
+                ) : (
+                  'Save Changes'
+                )}
               </Button>
             </div>
           </form>

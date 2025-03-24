@@ -11,3 +11,29 @@ export interface Branch {
   created_at: string
   updated_at: string
 }
+
+export interface MenuItem {
+  id: number;
+  microsites: number[];
+  name: string;
+  description: string;
+  price: string;
+  currency: string;
+  currency_display: string;
+  image: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateMenuItemDto {
+  name: string;
+  description: string;
+  price: string;
+  currency: string;
+  is_active: boolean;
+}
+
+export interface UpdateMenuItemDto extends Partial<CreateMenuItemDto> {
+  id: number;
+}

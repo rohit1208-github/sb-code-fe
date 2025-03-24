@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -12,45 +11,19 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { MenuDialog } from './components/menu-dialog'
-
-// Types for menu items - will be moved to types/api.ts when implementing API integration
-interface MenuItem {
-  id: number
-  name: string
-  description: string
-  price: number
-  category: string
-  isActive: boolean
-}
-
-// Mock data - will be replaced with API call
-const mockMenuItems: MenuItem[] = [
-  {
-    id: 1,
-    name: 'Margherita Pizza',
-    description: 'Classic tomato and mozzarella',
-    price: 12.99,
-    category: 'Pizza',
-    isActive: true,
-  },
-  {
-    id: 2,
-    name: 'Pepperoni Pizza',
-    description: 'Spicy pepperoni with cheese',
-    price: 14.99,
-    category: 'Pizza',
-    isActive: true,
-  },
-]
+import { useMenu } from '@/hooks/useMenu'
+import type { MenuItem } from '@/types/api'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function MenuPage() {
-  // State management - will be replaced with React Query hooks when implementing API
-  const [menuItems] = useState<MenuItem[]>(mockMenuItems)
+  const { menuItems, isLoading, deleteMenuItem, isDeleting } = useMenu()
 
-  // Handlers - will be updated with API integration
   const handleDelete = async (id: number) => {
-    // API integration will be added here
-    console.log('Delete item:', id)
+    try {
+      await deleteMenuItem(id)
+    } catch (error) {
+      console.error('Failed to delete menu item:', error)
+    }
   }
 
   return (
@@ -61,35 +34,58 @@ export default function MenuPage() {
           <MenuDialog mode="add" />
         </CardHeader>
         <CardContent>
-          {/* Search and filter options will be added here */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead>Category</TableHead>
                   <TableHead>Price</TableHead>
+                  <TableHead>Currency</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {menuItems.map((item) => (
+                {isLoading ? (
+                  // Loading skeleton
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[100px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[200px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[80px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[60px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[60px]" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-[100px]" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : menuItems?.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{item.description}</TableCell>
-                    <TableCell>{item.category}</TableCell>
-                    <TableCell>${item.price.toFixed(2)}</TableCell>
+                    <TableCell>{item.price}</TableCell>
+                    <TableCell>{item.currency_display}</TableCell>
                     <TableCell>
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          item.isActive
+                          item.is_active
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                         }`}
                       >
-                        {item.isActive ? 'Active' : 'Inactive'}
+                        {item.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
@@ -111,6 +107,7 @@ export default function MenuPage() {
                         size="sm"
                         className="text-red-600 hover:text-red-800"
                         onClick={() => handleDelete(item.id)}
+                        disabled={isDeleting}
                       >
                         Delete
                       </Button>
