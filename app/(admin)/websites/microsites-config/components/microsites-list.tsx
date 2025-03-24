@@ -145,6 +145,7 @@ export function MicrositesList() {
         columns={columns}
         data={filteredData}
         onRowClick={handleRowClick}
+        searchKey="name"
       />
 
       <div className="rounded-lg border bg-card p-6 space-y-4">
