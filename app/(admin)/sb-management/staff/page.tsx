@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +9,11 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import { StaffService } from "@/services/staff.service";
 import { ColumnDef } from "@tanstack/react-table";
-import { StaffMember, StaffRole, StaffStatus } from "@/types/staff";
+import { StaffMember } from "@/types/staff";
 import { useStaff } from "@/hooks/usestaff";
-
+import { Pencil1Icon } from "@radix-ui/react-icons";
+import { TrashIcon } from "@radix-ui/react-icons";
 export default function StaffPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,19 +22,8 @@ export default function StaffPage() {
 
   const columns = [
     {
-      accessorKey: "name",
+      accessorKey: "first_name",
       header: "Name",
-      cell: ({ row }: { row: StaffMember }) => {
-        const router = useRouter();
-        return (
-          <div
-            className="cursor-pointer"
-            onClick={() => router.push(`/sb-management/staff/${row.id}`)}
-          >
-            {row.first_name}
-          </div>
-        );
-      },
     },
     {
       accessorKey: "email",
@@ -76,13 +64,13 @@ export default function StaffPage() {
                 router.push(`/sb-management/staff/${row.original.id}`)
               }
             >
-              Edit
+              <Pencil1Icon className="h-4 w-4 text-yellow-500" />
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteStaffMember(row.original.id)}
             >
-              Delete
+              <TrashIcon className="h-4 w-4 text-white-500" />
             </Button>
           </div>
         );

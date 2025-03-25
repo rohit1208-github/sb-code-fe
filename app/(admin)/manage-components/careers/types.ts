@@ -8,20 +8,25 @@ export interface CareerPosting {
   description: string;
   url: string;
   is_active: boolean;
-  microsites: string[];
+  microsites: number[];
   status: CareerStatus;
-  branchId?: string;
+  branch?: number;
   branchName?: string;
   postedDate: string;
   lastUpdated: string;
+  department: string;
+  job_type: string;
 }
 
 export interface CareerPostingFormData {
   name: string;
   url: string;
   description: string;
-  microsites: string[];
+  microsites: number[];
   is_active: boolean;
+  department: string;
+  job_type: string;
+  branch: number;
 }
 
 export interface ApiResponse<T> {

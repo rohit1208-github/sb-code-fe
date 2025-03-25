@@ -26,7 +26,7 @@ export default function TestimonialsPage() {
         <DataTable 
           columns={TestimonialColumns} 
           data={testimonials}
-          searchKey="customerName"
+          searchKey="name"
         />
       </div>
 

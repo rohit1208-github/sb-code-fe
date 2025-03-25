@@ -29,6 +29,7 @@ export interface MenuItem {
 export interface CreateMenuItemDto {
   name: string;
   description: string;
+  microsites: number[];
   price: string;
   currency: string;
   is_active: boolean;

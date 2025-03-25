@@ -40,12 +40,7 @@ export const MenuService = {
   create: async (data: CreateMenuItemDto) => {
     console.log('MenuService: Creating new menu item:', data)
     try {
-      const formData = new FormData()
-      Object.entries({ ...data, microsite: 0 }).forEach(([key, value]) => {
-        formData.append(key, value.toString())
-      })
-
-      const response = await apiClient.post<MenuItem>(BASE_URL, formData)
+      const response = await apiClient.post<MenuItem>(BASE_URL, data)
       console.log('MenuService: Successfully created menu item:', response.data)
       return response.data
     } catch (error) {

@@ -8,12 +8,13 @@ import { DataTableRowActions } from "@/components/ui/data-table-row-actions";
 
 export type Testimonial = {
   id: string;
-  customerName: string;
+  name: string;
   rating: number;
   comment: string;
   status: "published" | "draft" | "archived";
   createdAt: string;
-  branch: string;
+  branch: number;
+  microsites: number[];
 };
 
 export const TestimonialColumns: ColumnDef<Testimonial>[] = [

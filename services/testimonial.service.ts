@@ -8,7 +8,10 @@ export interface CreateTestimonialDto {
   name: string;
   content: string;
   is_active: boolean;
-  microsites?: string;
+  microsites?: number[];
+  branch: number;
+  link: string;
+  rating: number;
 }
 
 export interface UpdateTestimonialDto extends Partial<CreateTestimonialDto> {

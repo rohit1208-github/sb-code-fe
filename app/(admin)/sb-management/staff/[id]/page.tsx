@@ -156,6 +156,10 @@ export default function StaffFormPage() {
         }
       />
 
+      {isLoadingRoles ||
+        isLoadingBranches ||
+        (isLoadingCountries && <div>Loading...</div>)}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
@@ -219,7 +223,7 @@ export default function StaffFormPage() {
                     {roles?.map((role: StaffRole) => (
                       <SelectItem key={role.id} value={role.id}>
                         {role.name}
-                      </SelectItem> 
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,7 +26,16 @@ import * as z from "zod";
 import { useMenu } from "@/hooks/useMenu";
 import type { MenuItem } from "@/types/api";
 import { toast } from "@/components/ui/use-toast";
-
+import { useMicrosites } from "@/hooks/useMicrosites";
+import { PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Command, CommandItem } from "@/components/ui/command";
+import { CommandEmpty, CommandGroup } from "@/components/ui/command";
+import { CommandList } from "@/components/ui/command";
+import { CommandInput } from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
 // Form schema - will be moved to separate file when implementing API
 const menuItemSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -34,7 +43,7 @@ const menuItemSchema = z.object({
   price: z.string().min(1, "Price is required"),
   currency: z.string().default("USD"),
   is_active: z.boolean().default(true),
-  microsite: z.number(),
+  microsites: z.array(z.number()),
 });
 
 type MenuItemFormValues = z.infer<typeof menuItemSchema>;
@@ -49,6 +58,8 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
   const [open, setOpen] = useState(false);
   const { createMenuItem, updateMenuItem, isCreating, isUpdating } = useMenu();
 
+  const { microsites } = useMicrosites();
+
   // Form setup with validation
   const form = useForm<MenuItemFormValues>({
     resolver: zodResolver(menuItemSchema),
@@ -60,7 +71,7 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
             price: menuItem.price,
             currency: menuItem.currency,
             is_active: menuItem.is_active,
-            microsite: menuItem.microsites[0] || 0,
+            microsites: menuItem.microsites || [],
           }
         : {
             name: "",
@@ -68,9 +79,22 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
             price: "",
             currency: "USD",
             is_active: true,
-            microsite: 0,
+            microsites: [],
           },
   });
+
+  const handleSelect = React.useCallback(
+    (micrositeId: number) => {
+      const currentValue = form.getValues("microsites");
+      const newValue = currentValue.includes(micrositeId)
+        ? currentValue.filter((id) => id !== micrositeId)
+        : [...currentValue, micrositeId];
+
+      form.setValue("microsites", newValue);
+      console.log("newValue :", newValue);
+    },
+    [form]
+  );
 
   // Form submission handler - will be updated with API integration
   const onSubmit = async (data: MenuItemFormValues) => {
@@ -188,19 +212,73 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
 
             <FormField
               control={form.control}
-              name="microsite"
+              name="microsites"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Microsites</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Enter microsites"
-                      {...field}
-                      value={0}
-                      disabled
-                    />
-                  </FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full flex flex-wrap gap-2 justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value.length > 0 ? (
+                            field.value.map((microsite) => (
+                              <Badge key={microsite} variant="secondary">
+                                {microsite}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-muted-foreground">
+                              Select microsite
+                            </span>
+                          )}
+                          <ChevronsUpDown className="opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandInput
+                          placeholder="Search microsites..."
+                          className="h-9"
+                        />
+                        <CommandList>
+                          <CommandGroup>
+                            {microsites?.map((microsite) => {
+                              const isSelected = field.value.includes(
+                                microsite.id
+                              );
+                              return (
+                                <div
+                                  key={microsite.id}
+                                  className={cn(
+                                    "flex items-center space-x-2 px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                                    isSelected && "bg-accent"
+                                  )}
+                                  onClick={() => handleSelect(microsite.id)}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <span>{microsite.name}</span>
+                                </div>
+                              );
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -217,7 +295,6 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
-                      
                     />
                   </FormControl>
                 </FormItem>
