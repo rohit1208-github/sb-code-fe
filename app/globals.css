@@ -89,11 +89,11 @@
   .gradient-primary {
     @apply bg-gradient-to-br from-primary/90 via-primary to-primary/90;
   }
-  
+
   .gradient-secondary {
     @apply bg-gradient-to-br from-secondary/90 via-secondary to-secondary/90;
   }
-  
+
   .gradient-accent {
     @apply bg-gradient-to-br from-accent/90 via-accent to-accent/90;
   }
@@ -162,4 +162,12 @@
     @apply bg-gradient-to-r from-primary via-primary to-primary;
     @apply bg-clip-text text-transparent;
   }
-} 
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}

@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -16,107 +16,108 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { useMenu } from '@/hooks/useMenu'
-import type { MenuItem } from '@/types/api'
-import { toast } from '@/components/ui/use-toast'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useMenu } from "@/hooks/useMenu";
+import type { MenuItem } from "@/types/api";
+import { toast } from "@/components/ui/use-toast";
 
 // Form schema - will be moved to separate file when implementing API
 const menuItemSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  price: z.string().min(1, 'Price is required'),
-  currency: z.string().default('USD'),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  description: z.string(),
+  price: z.string().min(1, "Price is required"),
+  currency: z.string().default("USD"),
   is_active: z.boolean().default(true),
-  microsite: z.number().default(0)
-})
+  microsite: z.number(),
+});
 
-type MenuItemFormValues = z.infer<typeof menuItemSchema>
+type MenuItemFormValues = z.infer<typeof menuItemSchema>;
 
 interface MenuDialogProps {
-  mode: 'add' | 'edit'
-  menuItem?: MenuItem
-  trigger?: React.ReactNode
+  mode: "add" | "edit";
+  menuItem?: MenuItem;
+  trigger?: React.ReactNode;
 }
 
 export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
-  const [open, setOpen] = useState(false)
-  const { createMenuItem, updateMenuItem, isCreating, isUpdating } = useMenu()
+  const [open, setOpen] = useState(false);
+  const { createMenuItem, updateMenuItem, isCreating, isUpdating } = useMenu();
 
   // Form setup with validation
   const form = useForm<MenuItemFormValues>({
     resolver: zodResolver(menuItemSchema),
-    defaultValues: mode === 'edit' && menuItem
-      ? {
-          name: menuItem.name,
-          description: menuItem.description,
-          price: menuItem.price,
-          currency: menuItem.currency,
-          is_active: menuItem.is_active,
-          microsite: menuItem.microsites[0] || 0
-        }
-      : {
-          name: '',
-          description: '',
-          price: '',
-          currency: 'USD',
-          is_active: true,
-          microsite: 0
-        },
-  })
+    defaultValues:
+      mode === "edit" && menuItem
+        ? {
+            name: menuItem.name,
+            description: menuItem.description,
+            price: menuItem.price,
+            currency: menuItem.currency,
+            is_active: menuItem.is_active,
+            microsite: menuItem.microsites[0] || 0,
+          }
+        : {
+            name: "",
+            description: "",
+            price: "",
+            currency: "USD",
+            is_active: true,
+            microsite: 0,
+          },
+  });
 
   // Form submission handler - will be updated with API integration
   const onSubmit = async (data: MenuItemFormValues) => {
     try {
-      console.log('MenuDialog: Submitting form data:', data)
-      
-      if (mode === 'add') {
-        await createMenuItem(data)
-        console.log('MenuDialog: Successfully created menu item')
+      console.log("MenuDialog: Submitting form data:", data);
+
+      if (mode === "add") {
+        await createMenuItem(data);
+        console.log("MenuDialog: Successfully created menu item");
         toast({
-          title: 'Success',
-          description: 'Menu item created successfully',
-        })
+          title: "Success",
+          description: "Menu item created successfully",
+        });
       } else if (menuItem) {
-        await updateMenuItem({ id: menuItem.id, ...data })
-        console.log('MenuDialog: Successfully updated menu item')
+        await updateMenuItem({ id: menuItem.id, ...data });
+        console.log("MenuDialog: Successfully updated menu item");
         toast({
-          title: 'Success',
-          description: 'Menu item updated successfully',
-        })
+          title: "Success",
+          description: "Menu item updated successfully",
+        });
       }
-      
-      setOpen(false)
-      form.reset()
+
+      setOpen(false);
+      form.reset();
     } catch (error) {
-      console.error('MenuDialog: Error submitting form:', error)
+      console.error("MenuDialog: Error submitting form:", error);
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to save menu item. Please try again.',
-      })
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save menu item. Please try again.",
+      });
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant={mode === 'add' ? 'success' : 'outline'}>
-            {mode === 'add' ? 'Add Menu Item' : 'Edit Menu Item'}
+          <Button variant={mode === "add" ? "success" : "outline"}>
+            {mode === "add" ? "Add Menu Item" : "Edit Menu Item"}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'add' ? 'Add New Menu Item' : 'Edit Menu Item'}
+            {mode === "add" ? "Add New Menu Item" : "Edit Menu Item"}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -152,24 +153,6 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
             />
             <FormField
               control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="Enter price"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="currency"
               render={({ field }) => (
                 <FormItem>
@@ -186,14 +169,33 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
             />
             <FormField
               control={form.control}
-              name="microsite"
+              name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Microsite ID</FormLabel>
+                  <FormLabel>Price</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter microsite ID"
+                      step="0.01"
+                      placeholder="Enter price"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="microsite"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Microsites</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter microsites"
                       {...field}
                       value={0}
                       disabled
@@ -215,6 +217,7 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      
                     />
                   </FormControl>
                 </FormItem>
@@ -230,21 +233,19 @@ export function MenuDialog({ mode, menuItem, trigger }: MenuDialogProps) {
               </Button>
               <Button
                 type="submit"
-                variant={mode === 'add' ? 'success' : 'default'}
+                variant={mode === "add" ? "success" : "default"}
                 disabled={isCreating || isUpdating}
               >
-                {isCreating || isUpdating ? (
-                  'Loading...'
-                ) : mode === 'add' ? (
-                  'Add Item'
-                ) : (
-                  'Save Changes'
-                )}
+                {isCreating || isUpdating
+                  ? "Loading..."
+                  : mode === "add"
+                  ? "Add Item"
+                  : "Save Changes"}
               </Button>
             </div>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}
