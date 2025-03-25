@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -24,6 +24,7 @@ import {
   Link as LinkIcon,
   Search
 } from "lucide-react";
+import { useAuthProtection } from "@/lib/client-auth";
 
 function NavLink({
   href,
@@ -65,6 +66,22 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { isAuthenticated } = useAuthProtection();
+  const router = useRouter();
+  
+  // If not authenticated, the useAuthProtection hook will handle redirection
+  // This is just an extra safety check
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  // If not authenticated, show nothing while redirecting
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="relative flex min-h-screen">
       {/* Mobile Navigation Trigger */}
