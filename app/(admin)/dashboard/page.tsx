@@ -115,7 +115,6 @@ export default function DashboardPage() {
   if (isLoading) {
     return <DashboardLoading />;
   }
-  
 
   return (
     <div className="space-y-6">
@@ -287,34 +286,6 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
-
-      {/* Recent Menu Items */}
-      {data?.recentMenuItems && data.recentMenuItems.length > 0 && (
-        <Card className={cardHoverClass}>
-          <CardHeader>
-            <CardTitle className={getCardTitleColor("branches")}>
-              Recent Menu Updates
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {data.recentMenuItems.map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.category}
-                    </p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {item.updatedAt}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Charts Section */}
       <div className="grid gap-4 md:grid-cols-2">

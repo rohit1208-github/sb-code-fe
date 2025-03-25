@@ -3,7 +3,6 @@ import { MicrositeService } from '@/services/microsite.service'
 import type { Microsite } from '@/types/microsites'
 
 export function useMicrosites() {
-  console.log('🎣 [useMicrosites] Hook initialized')
   const QUERY_KEY = ['microsites']
 
   const { data: microsites, isLoading, error } = useQuery({
@@ -19,9 +18,9 @@ export function useMicrosites() {
     }
   })
 
-  if (error) {
-    console.error('❌ [useMicrosites] Query error:', error)
-  }
+
+
+
 
   return {
     microsites,
@@ -29,6 +28,8 @@ export function useMicrosites() {
     error,
   }
 }
+
+
 
 export function useMicrosite(id: number) {
   console.log(`🎣 [useMicrosite] Hook initialized for id: ${id}`)

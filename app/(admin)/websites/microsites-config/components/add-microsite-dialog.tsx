@@ -12,9 +12,19 @@ import { Button } from '@/components/ui/button'
 import { PlusIcon } from '@radix-ui/react-icons'
 import { AddMicrositeForm } from './add-microsite-form'
 import { useState } from 'react'
+import { Microsite } from '@/types/microsites'
 
-export function AddMicrositeDialog() {
-  const [isOpen, setIsOpen] = useState(false)
+export function AddMicrositeDialog(
+  {
+    isOpen,
+    setIsOpen,
+    initialData,
+  }: {
+    isOpen: boolean;
+    setIsOpen: (isOpen: boolean) => void;
+    initialData?: Microsite;
+  }
+) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -31,7 +41,7 @@ export function AddMicrositeDialog() {
             Create a new microsite by filling out the form below.
           </DialogDescription>
         </DialogHeader>
-        <AddMicrositeForm onSuccess={() => setIsOpen(false)} />
+        <AddMicrositeForm initialData={initialData} onSuccess={() => setIsOpen(false)} />
       </DialogContent>
     </Dialog>
   )

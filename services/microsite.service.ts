@@ -1,6 +1,6 @@
 import { API_CONFIG } from '@/lib/api-config'
 import { apiClient } from '@/lib/api'
-import type { Microsite, MicrositeResponse, CreateMicrositeDto } from '@/types/microsites'
+import type { Microsite, MicrositeResponse, CreateMicrositeDto, UpdateMicrositeDto } from '@/types/microsites'
 
 const BASE_URL = '/api/microsites/'
 
@@ -11,14 +11,11 @@ export const MicrositeService = {
       const response = await apiClient.get<MicrositeResponse>(BASE_URL)
       console.log('✅ [MicrositeService] Successfully fetched microsites:', {
         count: response.data.length,
-        status: response.status,
       })
       return response
     } catch (error) {
       console.error('❌ [MicrositeService] Error fetching microsites:', {
         error,
-        status: error.response?.status,
-        message: error.message,
       })
       throw error
     }
@@ -31,14 +28,11 @@ export const MicrositeService = {
       console.log('✅ [MicrositeService] Successfully fetched microsite:', {
         id,
         name: response.data.name,
-        status: response.status,
       })
       return response
     } catch (error) {
       console.error(`❌ [MicrositeService] Error fetching microsite ${id}:`, {
         error,
-        status: error.response?.status,
-        message: error.message,
       })
       throw error
     }
@@ -58,19 +52,49 @@ export const MicrositeService = {
       console.log('✅ [MicrositeService] Successfully created microsite:', {
         id: response.data.id,
         name: response.data.name,
-        status: response.status,
       })
       return response
     } catch (error) {
       console.error('❌ [MicrositeService] Error creating microsite:', {
         error,
-        status: error.response?.status,
-        message: error.message,
         data,
       })
       throw error
     }
   },
 
-  // Additional methods will be added later for create, update, delete
+  update: async (id: number, data: UpdateMicrositeDto) => {
+    console.log('📝 [MicrositeService] Updating microsite:', data)
+    try {
+      const response = await apiClient.put<Microsite>(`${BASE_URL}${id}/`, data)
+      console.log('✅ [MicrositeService] Successfully updated microsite:', {
+        id, 
+        name: response.data.name,
+      })
+      return response
+    } catch (error) {
+      console.error('❌ [MicrositeService] Error updating microsite:', {
+        error,  
+        data,
+      })
+      throw error
+    }
+  },
+
+  delete: async (id: number) => {
+    console.log(`🔍 [MicrositeService] Deleting microsite by id: ${id}`)
+    try {
+      const response = await apiClient.delete(`${BASE_URL}${id}/`)
+      console.log('✅ [MicrositeService] Successfully deleted microsite:', {
+        id, 
+      })
+      return response
+    } catch (error) {
+      console.error('❌ [MicrositeService] Error deleting microsite:', {
+        error,
+        id,
+      })
+      throw error
+    }
+  }
 } 
