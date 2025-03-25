@@ -39,8 +39,8 @@ export interface CreateMicrositeDto {
   slug: string
   branches: number[]
   is_active: boolean
-  has_language_switcher: boolean
-  secondary_language: string | null
+  // has_language_switcher: boolean
+  // secondary_language: string | null
 }
 
 export interface UpdateMicrositeDto {
@@ -49,8 +49,8 @@ export interface UpdateMicrositeDto {
   slug: string
   branches: number[]
   is_active: boolean
-  has_language_switcher: boolean  
-  secondary_language: string | null
+  // has_language_switcher: boolean
+  // secondary_language: string | null
 }
 
 

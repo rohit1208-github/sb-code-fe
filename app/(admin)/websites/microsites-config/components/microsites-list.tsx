@@ -18,7 +18,11 @@ import {
 } from "@/components/ui/dialog";
 import { AddMicrositeDialog } from "./add-microsite-dialog";
 import { PencilIcon } from "@heroicons/react/24/outline";
-import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { MicrositeService } from "@/services/microsite.service";
 import { CreateMicrositeDto, Microsite } from "@/types/microsites";
 import { toast } from "sonner";
@@ -178,44 +182,7 @@ export function MicrositesList() {
         <AddMicrositeDialog isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        searchKey="name"
-      />
-
-      <div className="rounded-lg border bg-card p-6 space-y-4">
-        <h3 className="font-semibold">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() =>
-              console.log("🔄 [MicrositesList] Bulk Activate clicked")
-            }
-          >
-            Bulk Activate
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() =>
-              console.log("📝 [MicrositesList] Update Sections clicked")
-            }
-          >
-            Update Sections
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() =>
-              console.log("🎨 [MicrositesList] Manage Templates clicked")
-            }
-          >
-            Manage Templates
-          </Button>
-        </div>
-      </div>
+      <DataTable columns={columns} data={filteredData} searchKey="name" />
     </div>
   );
 }

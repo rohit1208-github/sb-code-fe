@@ -26,14 +26,15 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/use-toast";
 import { BranchSelect } from "./branch-select";
 import React from "react";
+import { useBranches } from "@/hooks/useBranches";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   slug: z.string().min(2, "Slug must be at least 2 characters"),
   branches: z.array(z.number()).min(1, "At least one branch must be selected"),
   is_active: z.boolean().default(true),
-  has_language_switcher: z.boolean().default(false),
-  secondary_language: z.string().nullable(),
+  // has_language_switcher: z.boolean().default(false),
+  // secondary_language: z.string().nullable(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -48,10 +49,7 @@ export function AddMicrositeForm({
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: branchesData } = useQuery({
-    queryKey: ["branches"],
-    queryFn: () => BranchesService.getAll(),
-  });
+  const { branches, isLoading } = useBranches();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -60,8 +58,8 @@ export function AddMicrositeForm({
       slug: "",
       branches: [],
       is_active: true,
-      has_language_switcher: false,
-      secondary_language: null,
+      // has_language_switcher: false,
+      // secondary_language: null,
     },
   });
 
@@ -121,11 +119,10 @@ export function AddMicrositeForm({
         slug: data.slug.trim(),
         branches: data.branches.map((id) => Number(id)),
         is_active: Boolean(data.is_active),
-        has_language_switcher: Boolean(data.has_language_switcher),
-        secondary_language: data.secondary_language || null,
+        // has_language_switcher: Boolean(data.has_language_switcher),
+        // secondary_language: data.secondary_language || null,
       };
 
-      console.log("🔄 [AddMicrositeForm] Formatted data:", formattedData);
       if (initialData) {
         await updateMutation.mutateAsync({
           ...data,
@@ -182,7 +179,7 @@ export function AddMicrositeForm({
                 <FormLabel>Branches</FormLabel>
                 <FormControl>
                   <BranchSelect
-                    branches={branchesData?.data || []}
+                    branches={branches || []}
                     value={value}
                     onChange={(newValue) => {
                       console.log("🔄 Branch Selection Change:", {
@@ -215,42 +212,7 @@ export function AddMicrositeForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="has_language_switcher"
-          render={({ field }) => (
-            <FormItem className="flex items-center justify-between">
-              <FormLabel>Language Switcher</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="secondary_language"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Secondary Language</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter secondary language"
-                  {...field}
-                  value={field.value || ""}
-                  disabled={!form.watch("has_language_switcher")}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <Button type="submit" disabled={isSubmitting || isLoading} className="w-full">
           {isSubmitting ? "Creating..." : "Create Microsite"}
         </Button>
       </form>
