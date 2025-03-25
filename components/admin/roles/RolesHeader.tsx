@@ -12,7 +12,8 @@ export function RolesHeader() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Roles Management</h1>
         <p className="text-muted-foreground">
-          Create and manage roles and their permissions
+          User roles for managing SB Dashboard. Contact tech team to add or edit
+          User Roles
         </p>
       </div>
     </div>

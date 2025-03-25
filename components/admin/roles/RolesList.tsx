@@ -18,7 +18,7 @@ import { PermissionMatrix } from "./PermissionMatrix";
 interface Role {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   permissions: string[];
   createdAt: string;
   updatedAt: string;
@@ -36,11 +36,11 @@ export function RolesList() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Role Name</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Permissions</TableHead>
+            <TableHead className="w-1/2">Role Name</TableHead>
+            <TableHead className="w-1/2">Description</TableHead>
+            {/* <TableHead>Permissions</TableHead> */}
             {/* <TableHead>Created At</TableHead> */}
-            <TableHead className="text-right">Actions</TableHead>
+            {/* <TableHead className="text-right">Actions</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -48,7 +48,7 @@ export function RolesList() {
             <TableRow key={role.id}>
               <TableCell className="font-medium">{role.name}</TableCell>
               <TableCell>{role?.description}</TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <div className="flex flex-wrap gap-1">
                   {role?.permissions && role?.permissions.length > 0 ? (
                     role?.permissions.map((permission) => (
@@ -60,13 +60,13 @@ export function RolesList() {
                     <Badge variant="secondary">No permissions</Badge>
                   )}
                 </div>
-              </TableCell>
+              </TableCell> */}
               {/* <TableCell>
                 {new Date(role.createdAt).toLocaleDateString()}
               </TableCell> */}
-              <TableCell className="text-right">
+              {/* <TableCell className="text-right"> */}
                 {/* <RoleActions role={role} onEdit={() => setSelectedRole(role)} /> */}
-              </TableCell>
+              {/* </TableCell> */}
             </TableRow>
           ))}
         </TableBody>
