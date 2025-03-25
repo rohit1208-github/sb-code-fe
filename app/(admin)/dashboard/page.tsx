@@ -71,7 +71,7 @@ function getCardTitleColor(
 }
 
 const cardHoverClass =
-  "transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer";
+  "transition-all duration-200 hover:scale-[1.02] hover:shadow-lg";
 
 // Dummy data for charts
 const visitorData = [
@@ -142,13 +142,6 @@ export default function DashboardPage() {
                     className="flex items-center justify-between gap-2"
                   >
                     <div className="flex items-center gap-2">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={20}
-                        height={20}
-                        className="rounded-md"
-                      />
                       <div>{item.name}</div>
                     </div>
                     <div className="text-sm text-muted-foreground text-center">
