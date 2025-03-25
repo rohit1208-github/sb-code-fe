@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import { API_CONFIG } from './api-config'
 import Cookies from 'js-cookie'
 
+
 // Types
 export interface ApiError {
   message: string
@@ -88,12 +89,13 @@ api.interceptors.response.use(
       }
     }
 
-    console.error('❌ Response Error:', errorResponse)
     const apiError: ApiError = {
       message: errorResponse.message || 'An unexpected error occurred',
       status: errorResponse.status,
       code: error.code,
     }
+    // location.href = '/login'
+    
     return Promise.reject(apiError)
   }
 )

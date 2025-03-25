@@ -21,6 +21,8 @@ import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 
 interface CareersTableProps {
   careers: CareerPosting[];
+  onEdit: (career: CareerPosting) => void;
+  onDelete: (career: CareerPosting) => void;
 }
 
 const getStatusColor = (status: CareerStatus) => {
@@ -36,38 +38,28 @@ const getStatusColor = (status: CareerStatus) => {
   }
 };
 
-export function CareersTable({ careers }: CareersTableProps) {
+export function CareersTable({ careers, onEdit, onDelete }: CareersTableProps) {
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>
-            <TableHead>Department</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Experience</TableHead>
+
             <TableHead>Status</TableHead>
-            <TableHead>Posted Date</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {careers.map((career) => (
             <TableRow key={career.id}>
-              <TableCell className="font-medium">{career.title}</TableCell>
-              <TableCell>{career.department}</TableCell>
-              <TableCell>{career.location}</TableCell>
-              <TableCell>{career.jobType}</TableCell>
-              <TableCell>{career.experienceLevel}</TableCell>
+              <TableCell className="font-medium">{career.name}</TableCell>
               <TableCell>
-                <Badge className={getStatusColor(career.status)}>
-                  {career.status}
+                <Badge className={getStatusColor(career.is_active ? "active" : "inactive")}>
+                  {career.is_active ? "Active" : "Inactive"}
                 </Badge>
               </TableCell>
-              <TableCell>
-                {new Date(career.postedDate).toLocaleDateString()}
-              </TableCell>
+             
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -77,11 +69,11 @@ export function CareersTable({ careers }: CareersTableProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onEdit(career)}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem className="text-red-600" onClick={() => onDelete(career)}>
                       <Trash className="mr-2 h-4 w-4" />
                       Delete
                     </DropdownMenuItem>

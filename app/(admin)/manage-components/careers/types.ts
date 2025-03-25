@@ -3,14 +3,12 @@ export type JobType = "full-time" | "part-time" | "contract" | "internship";
 export type ExperienceLevel = "entry" | "mid" | "senior" | "lead";
 
 export interface CareerPosting {
-  id: string;
-  title: string;
-  department: string;
-  location: string;
-  jobType: JobType;
-  experienceLevel: ExperienceLevel;
+  id?: number;
+  name: string;
   description: string;
-  requirements: string[];
+  url: string;
+  is_active: boolean;
+  microsites: string[];
   status: CareerStatus;
   branchId?: string;
   branchName?: string;
@@ -19,14 +17,11 @@ export interface CareerPosting {
 }
 
 export interface CareerPostingFormData {
-  title: string;
-  department: string;
-  location: string;
-  jobType: JobType;
-  experienceLevel: ExperienceLevel;
+  name: string;
+  url: string;
   description: string;
-  requirements: string[];
-  branchId?: string;
+  microsites: string[];
+  is_active: boolean;
 }
 
 export interface ApiResponse<T> {
@@ -36,4 +31,4 @@ export interface ApiResponse<T> {
 }
 
 export interface CareerPostingsResponse extends ApiResponse<CareerPosting[]> {}
-export interface CareerPostingResponse extends ApiResponse<CareerPosting> {} 
+export interface CareerPostingResponse extends ApiResponse<CareerPosting> {}

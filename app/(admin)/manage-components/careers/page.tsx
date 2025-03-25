@@ -7,62 +7,48 @@ import { Plus } from "lucide-react";
 import { CareerPosting } from "./types";
 import { CareersTable } from "./components/careers-table";
 import { CareerFormDialog } from "./components/career-form-dialog";
+import { useCareerPostings } from "@/hooks/useCareers";
 
 export default function CareersPage() {
   const [open, setOpen] = useState(false);
+  const [initialData, setInitialData] = useState<CareerPosting | null>(null);
   const { toast } = useToast();
-  
-  // Mock data - will be replaced with API call
-  const [careers] = useState<CareerPosting[]>([
-    {
-      id: "1",
-      title: "Senior Chef",
-      department: "Kitchen",
-      location: "Dubai",
-      jobType: "full-time",
-      experienceLevel: "senior",
-      description: "We are looking for an experienced Senior Chef...",
-      requirements: ["5+ years experience", "Culinary degree", "Team management"],
-      status: "active",
-      postedDate: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
-    },
-  ]);
 
-  const handleCreate = async (data: CareerPosting) => {
-    try {
-      // API integration will be added here
-      toast({
-        title: "Success",
-        description: "Career posting created successfully",
-      });
-      setOpen(false);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create career posting",
-        variant: "destructive",
-      });
-    }
+  const { careerPostings, isLoading, refetch, deleteCareerPosting } =
+    useCareerPostings();
+
+  const handleEdit = (career: CareerPosting) => {
+    setOpen(true);
+    setInitialData(career);
   };
 
+  const handleDelete = async (career: CareerPosting) => {
+    await deleteCareerPosting(career.id?.toString() || "");
+    refetch();
+  };
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Career Postings</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Career Postings
+        </h1>
         <Button onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Posting
         </Button>
       </div>
 
-      <CareersTable careers={careers} />
-      
+      <CareersTable
+        careers={careerPostings}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+
       <CareerFormDialog
         open={open}
         onOpenChange={setOpen}
-        onSubmit={handleCreate}
+        initialData={initialData || undefined}
       />
     </div>
   );
-} 
+}

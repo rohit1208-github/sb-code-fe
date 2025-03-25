@@ -17,66 +17,70 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { CareerPosting, CareerPostingFormData, JobType, ExperienceLevel } from "../types";
-
+import { CareerPosting, CareerPostingFormData } from "../types";
+import { Switch } from "@/components/ui/switch";
+import { useCareerPostings } from "@/hooks/useCareers";
+import { useEffect } from "react";
 const formSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  department: z.string().min(1, "Department is required"),
-  location: z.string().min(1, "Location is required"),
-  jobType: z.enum(["full-time", "part-time", "contract", "internship"] as const),
-  experienceLevel: z.enum(["entry", "mid", "senior", "lead"] as const),
+  name: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  requirements: z.string().transform((val) => val.split("\n").filter(Boolean)),
+  url: z.string().min(1, "URL is required"),
+  is_active: z.boolean().default(true),
+  microsites: z.array(z.string()),
 });
 
 interface CareerFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: CareerPosting) => Promise<void>;
   initialData?: CareerPosting;
 }
 
 export function CareerFormDialog({
   open,
   onOpenChange,
-  onSubmit,
   initialData,
 }: CareerFormDialogProps) {
   const form = useForm<CareerPostingFormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
-      title: "",
-      department: "",
-      location: "",
-      jobType: "full-time",
-      experienceLevel: "mid",
-      description: "",
-      requirements: [],
+    defaultValues: {
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      url: initialData?.url || "",
+      is_active: initialData?.is_active || true,
+      microsites: initialData?.microsites || [],
     },
   });
+
+  useEffect(() => {
+    form.setValue("name", initialData?.name || "");
+    form.setValue("description", initialData?.description || "");
+    form.setValue("url", initialData?.url || "");
+    form.setValue("is_active", initialData?.is_active || true);
+    form.setValue("microsites", initialData?.microsites || []);
+  }, [initialData]);
+
+  const { createCareerPosting, updateCareerPosting, isCreating, isUpdating } =
+    useCareerPostings();
 
   const handleSubmit = async (data: CareerPostingFormData) => {
     // Transform form data to CareerPosting format
     const postingData: CareerPosting = {
-      id: initialData?.id || String(Date.now()),
       ...data,
       status: initialData?.status || "draft",
       postedDate: initialData?.postedDate || new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
     };
-    
-    await onSubmit(postingData);
+    if (initialData && initialData.id) {
+      await updateCareerPosting({ id: initialData.id, data: postingData });
+    } else {
+      await createCareerPosting(postingData);
+    }
     form.reset();
+    onOpenChange(false);
   };
 
   return (
@@ -88,13 +92,16 @@ export function CareerFormDialog({
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
-              name="title"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Job title" {...field} />
                   </FormControl>
@@ -102,92 +109,6 @@ export function CareerFormDialog({
                 </FormItem>
               )}
             />
-            
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="department"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Department</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Department" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Location" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="jobType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select job type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="full-time">Full Time</SelectItem>
-                        <SelectItem value="part-time">Part Time</SelectItem>
-                        <SelectItem value="contract">Contract</SelectItem>
-                        <SelectItem value="internship">Internship</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="experienceLevel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Experience Level</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select experience level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="entry">Entry Level</SelectItem>
-                        <SelectItem value="mid">Mid Level</SelectItem>
-                        <SelectItem value="senior">Senior Level</SelectItem>
-                        <SelectItem value="lead">Lead Level</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <FormField
               control={form.control}
@@ -209,23 +130,34 @@ export function CareerFormDialog({
 
             <FormField
               control={form.control}
-              name="requirements"
+              name="url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Requirements (one per line)</FormLabel>
+                  <FormLabel>URL</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Enter requirements (one per line)"
-                      className="min-h-[100px]"
-                      {...field}
-                      value={Array.isArray(field.value) ? field.value.join("\n") : field.value}
-                    />
+                    <Input placeholder="Job URL" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="flex justify-end space-x-2">
               <Button
                 type="button"
@@ -234,7 +166,7 @@ export function CareerFormDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={isCreating || isUpdating}>
                 {initialData ? "Update" : "Create"}
               </Button>
             </div>
@@ -243,4 +175,4 @@ export function CareerFormDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}

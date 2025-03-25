@@ -1,83 +1,94 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { DataTable } from '@/components/ui/data-table'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { PlusIcon } from '@radix-ui/react-icons'
-import { useRouter } from 'next/navigation'
-import { PageHeader } from '@/components/ui/page-header'
-import { Suspense } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-
-interface StaffMember {
-  id: string
-  name: string
-  email: string
-  role: string
-  status: 'active' | 'inactive'
-  lastActive: string
-}
-
-const columns = [
-  {
-    accessorKey: 'name',
-    header: 'Name',
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-  },
-  {
-    accessorKey: 'role',
-    header: 'Role',
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => (
-      <span className={`px-2 py-1 rounded-full text-xs ${
-        row.original.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-      }`}>
-        {row.original.status}
-      </span>
-    ),
-  },
-  {
-    accessorKey: 'lastActive',
-    header: 'Last Active',
-  },
-]
-
-// Temporary mock data - will be replaced with API call
-const mockData: StaffMember[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'Admin',
-    status: 'active',
-    lastActive: '2024-03-22',
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    role: 'Manager',
-    status: 'active',
-    lastActive: '2024-03-21',
-  },
-]
+import { useEffect, useState } from "react";
+import { DataTable } from "@/components/ui/data-table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PlusIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
+import { PageHeader } from "@/components/ui/page-header";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { StaffService } from "@/services/staff.service";
+import { ColumnDef } from "@tanstack/react-table";
+import { StaffMember, StaffRole, StaffStatus } from "@/types/staff";
+import { useStaff } from "@/hooks/usestaff";
 
 export default function StaffPage() {
-  const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState('')
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredData = mockData.filter(staff => 
-    staff.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    staff.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    staff.role.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const { staff = [], isLoading, deleteStaffMember } = useStaff();
+
+  const columns = [
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }: { row: StaffMember }) => {
+        const router = useRouter();
+        return (
+          <div
+            className="cursor-pointer"
+            onClick={() => router.push(`/sb-management/staff/${row.id}`)}
+          >
+            {row.first_name}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      accessorKey: "role",
+      header: "Role",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }: { row: { original: StaffMember } }) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs ${
+            row.original.is_active === true
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {row.original.is_active === true ? "Active" : "Inactive"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "lastActive",
+      header: "Last Active",
+    },
+    {
+      header: "Actions",
+      cell: ({ row }: { row: { original: StaffMember } }) => {
+        const router = useRouter();
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                router.push(`/sb-management/staff/${row.original.id}`)
+              }
+            >
+              Edit
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteStaffMember(row.original.id)}
+            >
+              Delete
+            </Button>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -94,7 +105,7 @@ export default function StaffPage() {
           className="max-w-sm"
         />
         <Button
-          onClick={() => router.push('/sb-management/staff/new')}
+          onClick={() => router.push("/sb-management/staff/new")}
           className="flex items-center gap-2"
         >
           <PlusIcon className="h-4 w-4" />
@@ -104,14 +115,13 @@ export default function StaffPage() {
 
       <Suspense fallback={<StaffTableSkeleton />}>
         <DataTable
-          columns={columns}
-          data={filteredData}
-          onRowClick={(row) => router.push(`/sb-management/staff/${row.id}`)}
+          columns={columns as ColumnDef<StaffMember>[]}
+          data={staff || []}
           searchKey="name"
         />
       </Suspense>
     </div>
-  )
+  );
 }
 
 function StaffTableSkeleton() {
@@ -134,5 +144,5 @@ function StaffTableSkeleton() {
         </div>
       ))}
     </div>
-  )
-} 
+  );
+}

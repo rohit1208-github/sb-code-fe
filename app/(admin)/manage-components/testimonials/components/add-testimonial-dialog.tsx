@@ -1,50 +1,79 @@
-"use client"
+"use client";
 
-import * as z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useTestimonials } from "@/hooks/useTestimonials";
 
 const testimonialFormSchema = z.object({
-  customerName: z.string().min(2, "Customer name must be at least 2 characters"),
-  rating: z.string().refine((val) => !isNaN(parseInt(val)) && parseInt(val) >= 1 && parseInt(val) <= 5, {
-    message: "Rating must be between 1 and 5",
-  }),
-  comment: z.string().min(10, "Comment must be at least 10 characters"),
-  status: z.enum(["published", "draft", "archived"]),
-  branch: z.string().min(1, "Please select a branch"),
-})
+  name: z.string().min(2, "Customer name must be at least 2 characters"),
 
-type TestimonialFormValues = z.infer<typeof testimonialFormSchema>
+  content: z.string().min(10, "Comment must be at least 10 characters"),
+  is_active: z.boolean(),
+  // microsites: z.array(z.string()),
+});
+
+type TestimonialFormValues = z.infer<typeof testimonialFormSchema>;
 
 const defaultValues: Partial<TestimonialFormValues> = {
-  status: "draft",
-}
+  is_active: true,
+};
 
 interface AddTestimonialDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function AddTestimonialDialog({ open, onOpenChange }: AddTestimonialDialogProps) {
+export function AddTestimonialDialog({
+  open,
+  onOpenChange,
+}: AddTestimonialDialogProps) {
   const form = useForm<TestimonialFormValues>({
     resolver: zodResolver(testimonialFormSchema),
     defaultValues,
-  })
+  });
+
+  const { createTestimonial, isCreating } = useTestimonials();
 
   async function onSubmit(data: TestimonialFormValues) {
     try {
       // Will be implemented when API is ready
-      console.log(data)
-      onOpenChange(false)
-      form.reset()
+      console.log(data);
+      await createTestimonial({
+        name: data.name,
+        content: data.content,
+        is_active: data.is_active,
+        // microsites: data.microsites.join(","),
+      });
+      onOpenChange(false);
+      form.reset();
     } catch (error) {
-      console.error("Error submitting testimonial:", error)
+      console.error("Error submitting testimonial:", error);
     }
   }
 
@@ -58,7 +87,7 @@ export function AddTestimonialDialog({ open, onOpenChange }: AddTestimonialDialo
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="customerName"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Customer Name</FormLabel>
@@ -71,20 +100,7 @@ export function AddTestimonialDialog({ open, onOpenChange }: AddTestimonialDialo
             />
             <FormField
               control={form.control}
-              name="rating"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rating (1-5)</FormLabel>
-                  <FormControl>
-                    <Input type="number" min={1} max={5} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="comment"
+              name="content"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Comment</FormLabel>
@@ -97,40 +113,34 @@ export function AddTestimonialDialog({ open, onOpenChange }: AddTestimonialDialo
             />
             <FormField
               control={form.control}
-              name="status"
+              name="is_active"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="archived">Archived</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
+            {/* <FormField
               control={form.control}
-              name="branch"
+              name="microsites"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Branch</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select branch" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {/* Will be populated from API later */}
                       <SelectItem value="branch-1">Branch 1</SelectItem>
                       <SelectItem value="branch-2">Branch 2</SelectItem>
                     </SelectContent>
@@ -138,7 +148,7 @@ export function AddTestimonialDialog({ open, onOpenChange }: AddTestimonialDialo
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
@@ -149,5 +159,5 @@ export function AddTestimonialDialog({ open, onOpenChange }: AddTestimonialDialo
         </Form>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}

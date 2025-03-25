@@ -7,6 +7,10 @@ export const API_CONFIG = {
     COUNTRIES: '/api/management/countries/',
     BRANCHES: '/api/management/branches/',
     DASHBOARD_STATS: '/api/analytics/dashboard-stats/',
+    ROLES: '/api/users/roles',
+    USERS: '/api/users',
+    TESTIMONIALS: '/api/content/testimonials',
+    CAREERS: '/api/content/careers',
   },
 } as const
 

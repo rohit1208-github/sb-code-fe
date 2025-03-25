@@ -6,9 +6,11 @@ import { DataTable } from "@/components/ui/data-table"
 import { PlusCircle } from "lucide-react"
 import { TestimonialColumns } from "./components/columns"
 import { AddTestimonialDialog } from "./components/add-testimonial-dialog"
-
+import { useTestimonials } from "@/hooks/useTestimonials";
 export default function TestimonialsPage() {
   const [open, setOpen] = useState(false)
+
+  const { testimonials, isLoading } = useTestimonials();
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -23,7 +25,7 @@ export default function TestimonialsPage() {
       <div className="space-y-4">
         <DataTable 
           columns={TestimonialColumns} 
-          data={[]} // Will be populated from API later
+          data={testimonials}
           searchKey="customerName"
         />
       </div>

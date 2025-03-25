@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Role, CreateRoleInput, UpdateRoleInput } from '@/types/roles'
 import { toast } from '@/hooks/use-toast'
-
+import { StaffService } from '@/services/staff.service'
 // This would be replaced with actual API calls
 const mockRoles: Role[] = [
   {
@@ -14,13 +14,6 @@ const mockRoles: Role[] = [
   },
   // Add more mock roles as needed
 ]
-
-async function fetchRoles(): Promise<Role[]> {
-  // This would be replaced with an actual API call
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(mockRoles), 1000)
-  })
-}
 
 async function createRole(input: CreateRoleInput): Promise<Role> {
   // This would be replaced with an actual API call
@@ -59,7 +52,10 @@ export function useRoles() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['roles'],
-    queryFn: fetchRoles,
+    queryFn: async () => {
+      const response = await StaffService.getRoles();
+      return response.data;
+    },
   })
 
   const createMutation = useMutation({

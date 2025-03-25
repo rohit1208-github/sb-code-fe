@@ -1,96 +1,101 @@
-import { apiClient } from "@/lib/api"
-import type { Testimonial } from "@/app/(admin)/manage-components/testimonials/components/columns"
+import { apiClient } from "@/lib/api";
+import type { Testimonial } from "@/app/(admin)/manage-components/testimonials/components/columns";
+import { API_CONFIG } from "@/lib/api-config";
 
-const BASE_URL = "/api/testimonials/"
+const TESTIMONIALS_BASE_URL = API_CONFIG.ENDPOINTS.TESTIMONIALS;
 
 export interface CreateTestimonialDto {
-  customerName: string
-  rating: number
-  comment: string
-  status: "published" | "draft" | "archived"
-  branch: string
+  name: string;
+  content: string;
+  is_active: boolean;
+  microsites?: string;
 }
 
 export interface UpdateTestimonialDto extends Partial<CreateTestimonialDto> {
-  id: string
+  id: string;
 }
 
 export const TestimonialService = {
   getAll: async () => {
-    console.log("🔍 [TestimonialService] Fetching all testimonials")
+    console.log("🔍 [TestimonialService] Fetching all testimonials");
     try {
-      const response = await apiClient.get<Testimonial[]>(BASE_URL)
-      console.log("✅ [TestimonialService] Successfully fetched testimonials:", {
-        count: response.data.length,
-        status: response.status,
-      })
-      return response
+      const response = await apiClient.get<Testimonial[]>(
+        TESTIMONIALS_BASE_URL
+      );
+      console.log(
+        "✅ [TestimonialService] Successfully fetched testimonials:",
+        {
+          count: response.data.length,
+        }
+      );
+      return response;
     } catch (error) {
       console.error("❌ [TestimonialService] Error fetching testimonials:", {
         error,
-        status: error.response?.status,
-        message: error.message,
-      })
-      throw error
+      });
+      throw error;
     }
   },
 
   create: async (data: CreateTestimonialDto) => {
-    console.log("📝 [TestimonialService] Creating new testimonial:", data)
+    console.log("📝 [TestimonialService] Creating new testimonial:", data);
     try {
-      const response = await apiClient.post<Testimonial>(BASE_URL, data)
+      const response = await apiClient.post<Testimonial>(
+        `${TESTIMONIALS_BASE_URL}/`,
+        data
+      );
       console.log("✅ [TestimonialService] Successfully created testimonial:", {
         id: response.data.id,
-        status: response.status,
-      })
-      return response
+      });
+      return response;
     } catch (error) {
       console.error("❌ [TestimonialService] Error creating testimonial:", {
         error,
-        status: error.response?.status,
-        message: error.message,
         data,
-      })
-      throw error
+      });
+      throw error;
     }
   },
 
   update: async ({ id, ...data }: UpdateTestimonialDto) => {
-    console.log(`📝 [TestimonialService] Updating testimonial ${id}:`, data)
+    console.log(`📝 [TestimonialService] Updating testimonial ${id}:`, data);
     try {
-      const response = await apiClient.patch<Testimonial>(`${BASE_URL}${id}/`, data)
+      const response = await apiClient.patch<Testimonial>(
+        `${TESTIMONIALS_BASE_URL}/${id}/`,
+        data
+      );
       console.log("✅ [TestimonialService] Successfully updated testimonial:", {
         id: response.data.id,
-        status: response.status,
-      })
-      return response
+      });
+      return response;
     } catch (error) {
-      console.error(`❌ [TestimonialService] Error updating testimonial ${id}:`, {
-        error,
-        status: error.response?.status,
-        message: error.message,
-        data,
-      })
-      throw error
+      console.error(
+        `❌ [TestimonialService] Error updating testimonial ${id}:`,
+        {
+          error,
+          data,
+        }
+      );
+      throw error;
     }
   },
 
   delete: async (id: string) => {
-    console.log(`🗑️ [TestimonialService] Deleting testimonial ${id}`)
+    console.log(`🗑️ [TestimonialService] Deleting testimonial ${id}`);
     try {
-      const response = await apiClient.delete(`${BASE_URL}${id}/`)
+      const response = await apiClient.delete(`${TESTIMONIALS_BASE_URL}${id}/`);
       console.log("✅ [TestimonialService] Successfully deleted testimonial:", {
         id,
-        status: response.status,
-      })
-      return response
+      });
+      return response;
     } catch (error) {
-      console.error(`❌ [TestimonialService] Error deleting testimonial ${id}:`, {
-        error,
-        status: error.response?.status,
-        message: error.message,
-      })
-      throw error
+      console.error(
+        `❌ [TestimonialService] Error deleting testimonial ${id}:`,
+        {
+          error,
+        }
+      );
+      throw error;
     }
   },
-} 
+};

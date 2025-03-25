@@ -7,17 +7,19 @@ export function middleware(request: NextRequest) {
   // Later we can add more sophisticated auth checks
   const isAuthPage = request.nextUrl.pathname === '/login'
   const isAdminPage = request.nextUrl.pathname.startsWith('/(admin)')
+  const isDashboardPage = request.nextUrl.pathname.startsWith('/sb-management')
   
   // Check for auth token in cookies
-  const authToken = request.cookies.get('sb-auth-token')?.value
+  const authToken = request.cookies.get('sb-access-token')?.value
+  console.log('authToken :', authToken);
 
   // If we have an auth token and trying to access login, redirect to admin dashboard
   if (isAuthPage && authToken) {
     return NextResponse.redirect(new URL('/(admin)/dashboard', request.url))
   }
 
-  // If trying to access admin pages without auth token, redirect to login
-  if (isAdminPage && !authToken) {
+  // If trying to access protected pages without auth token, redirect to login
+  if ((isAdminPage || isDashboardPage) && !authToken) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -36,6 +38,7 @@ export const config = {
      */
     '/dashboard/:path*',
     '/login',
-    '/(admin)/:path*'
+    '/(admin)/:path*',
+    '/sb-management/:path*',
   ],
 } 
