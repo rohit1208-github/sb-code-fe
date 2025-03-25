@@ -160,7 +160,9 @@ export function BranchDialog({ mode, branch, trigger }: BranchDialogProps) {
         <DialogHeader>
           <DialogTitle>{mode === "edit" ? "Edit" : "Add"} Branch</DialogTitle>
           <DialogDescription>
-            {mode === "edit" ? "Update the branch details below." : "Add a new branch with the form below."}
+            {mode === "edit" 
+              ? "Edit SB branches for Countries" 
+              : "Add SB branches for Countries"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

@@ -32,7 +32,7 @@ export function BranchesTable({ branches, isLoading }: BranchesTableProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="heading-enhanced bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
-          BRANCHES
+          Branches
         </CardTitle>
         <BranchDialog
           mode="add"
@@ -48,16 +48,16 @@ export function BranchesTable({ branches, isLoading }: BranchesTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-enhanced uppercase">Name</TableHead>
-              <TableHead className="text-enhanced uppercase">Country</TableHead>
-              <TableHead className="text-enhanced uppercase">Address</TableHead>
-              <TableHead className="text-enhanced uppercase">Phone</TableHead>
-              <TableHead className="text-enhanced uppercase">Email</TableHead>
-              <TableHead className="text-enhanced uppercase">Status</TableHead>
-              <TableHead className="text-enhanced uppercase">
+              <TableHead className="text-enhanced">Name</TableHead>
+              <TableHead className="text-enhanced">Country</TableHead>
+              <TableHead className="text-enhanced">Address</TableHead>
+              <TableHead className="text-enhanced">Phone</TableHead>
+              <TableHead className="text-enhanced">Email</TableHead>
+              <TableHead className="text-enhanced">Status</TableHead>
+              <TableHead className="text-enhanced">
                 Online Ordering
               </TableHead>
-              <TableHead className="text-enhanced uppercase text-right">
+              <TableHead className="text-enhanced text-right">
                 Actions
               </TableHead>
             </TableRow>
