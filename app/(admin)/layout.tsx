@@ -205,10 +205,10 @@ function NavigationContent() {
           Optimization
         </h3>
         <div className="space-y-1">
-          <NavLink href="/optimization/whatsapp-links" icon={LinkIcon}>
+          <NavLink href="#" icon={LinkIcon}>
             WhatsApp Links
           </NavLink>
-          <NavLink href="/optimization/seo" icon={Search}>
+          <NavLink href="#" icon={Search}>
             SEO
           </NavLink>
         </div>
