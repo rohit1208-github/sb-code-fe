@@ -82,16 +82,16 @@ export default function StaffPage() {
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader
         title="Staff Management"
-        description="Manage your staff members and their roles."
+        description="Manage SB Staff Members for all Countries & Branches"
       />
 
-      <div className="flex justify-between items-center gap-4">
-        <Input
+      <div className="flex justify-end items-center gap-4">
+        {/* <Input
           placeholder="Search staff..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
-        />
+        /> */}
         <Button
           onClick={() => router.push("/sb-management/staff/new")}
           className="flex items-center gap-2"
