@@ -6,47 +6,24 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import dynamic from "next/dynamic";
-
-// Dynamically import icons
-const Menu = dynamic(() => import("lucide-react").then((mod) => mod.Menu));
-const LayoutDashboard = dynamic(() =>
-  import("lucide-react").then((mod) => mod.LayoutDashboard)
-);
-const Globe = dynamic(() => import("lucide-react").then((mod) => mod.Globe));
-const Building2 = dynamic(() =>
-  import("lucide-react").then((mod) => mod.Building2)
-);
-const Users = dynamic(() => import("lucide-react").then((mod) => mod.Users));
-const UserCog = dynamic(() =>
-  import("lucide-react").then((mod) => mod.UserCog)
-);
-const Palette = dynamic(() =>
-  import("lucide-react").then((mod) => mod.Palette)
-);
-const FileCode = dynamic(() =>
-  import("lucide-react").then((mod) => mod.FileCode)
-);
-const MenuSquare = dynamic(() =>
-  import("lucide-react").then((mod) => mod.MenuSquare)
-);
-const MessageSquare = dynamic(() =>
-  import("lucide-react").then((mod) => mod.MessageSquare)
-);
-const Languages = dynamic(() =>
-  import("lucide-react").then((mod) => mod.Languages)
-);
-const UtensilsCrossed = dynamic(() =>
-  import("lucide-react").then((mod) => mod.UtensilsCrossed)
-);
-const Briefcase = dynamic(() =>
-  import("lucide-react").then((mod) => mod.Briefcase)
-);
-const Settings = dynamic(() =>
-  import("lucide-react").then((mod) => mod.Settings)
-);
-const LinkIcon = dynamic(() => import("lucide-react").then((mod) => mod.Link));
-const Search = dynamic(() => import("lucide-react").then((mod) => mod.Search));
+import {
+  Menu,
+  LayoutDashboard,
+  Globe,
+  Building2,
+  Users,
+  UserCog,
+  Palette,
+  FileCode,
+  MenuSquare,
+  MessageSquare,
+  Languages,
+  UtensilsCrossed,
+  Briefcase,
+  Settings,
+  Link as LinkIcon,
+  Search
+} from "lucide-react";
 
 function NavLink({
   href,
@@ -61,14 +38,6 @@ function NavLink({
   const pathname = usePathname();
   const isActive = pathname === href;
 
-  // Prefetch the next page on hover
-  const handleMouseEnter = () => {
-    const prefetchLink = document.createElement("link");
-    prefetchLink.rel = "prefetch";
-    prefetchLink.href = href;
-    document.head.appendChild(prefetchLink);
-  };
-
   return (
     <Button
       asChild
@@ -77,9 +46,8 @@ function NavLink({
         "w-full justify-start gap-2",
         isActive && "bg-accent text-accent-foreground"
       )}
-      onMouseEnter={handleMouseEnter}
     >
-      <Link href={href} className="flex items-center gap-2">
+      <Link href={href} className="flex items-center gap-2" prefetch={true}>
         <Icon className="h-4 w-4 shrink-0" />
         <span>{children}</span>
       </Link>
