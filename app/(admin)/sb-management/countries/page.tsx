@@ -10,7 +10,7 @@ export default function CountriesPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="heading-enhanced bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
-            COUNTRIES
+            Countries
           </CardTitle>
           <CountryDialog mode="add" />
         </CardHeader>

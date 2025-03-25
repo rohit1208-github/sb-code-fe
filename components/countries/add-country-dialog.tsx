@@ -179,8 +179,8 @@ export function CountryDialog({ mode, country, trigger }: CountryDialogProps) {
           </DialogTitle>
           <DialogDescription>
             {mode === 'edit' 
-              ? 'Edit the country details below.'
-              : 'Add a new country to the system.'}
+              ? 'Edit a new country where SB is present'
+              : 'Add a new country where SB is present'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
