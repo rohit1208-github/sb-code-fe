@@ -94,7 +94,7 @@ api.interceptors.response.use(
       status: errorResponse.status,
       code: error.code,
     }
-    // location.href = '/login'
+    location.href = '/login'
     
     return Promise.reject(apiError)
   }
