@@ -94,10 +94,10 @@ export function DeliveryConfigTable() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem>
+                    {/* <DropdownMenuItem>
                       <Pencil className="mr-2 h-4 w-4" />
                       Edit
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem className="text-red-600">
                       <Trash className="mr-2 h-4 w-4" />
                       Delete

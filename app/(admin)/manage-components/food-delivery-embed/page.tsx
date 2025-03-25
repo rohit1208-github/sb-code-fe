@@ -20,10 +20,10 @@ export default function FoodDeliveryPage() {
             Manage food delivery service integrations and configurations
           </p>
         </div>
-        <Button onClick={() => setOpen(true)}>
+        {/* <Button onClick={() => setOpen(true)}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Configuration
-        </Button>
+        </Button> */}
       </div>
 
       <DeliveryConfigTable />
