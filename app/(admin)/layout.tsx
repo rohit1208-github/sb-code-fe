@@ -138,7 +138,7 @@ function NavigationContent() {
           Key Navigation
         </h3>
         <NavLink href="/dashboard" icon={LayoutDashboard}>
-          Dashboard
+          SB Dashboard
         </NavLink>
       </div>
 
