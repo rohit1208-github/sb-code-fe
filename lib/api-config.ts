@@ -1,5 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: 'http://34.60.128.41:8000',
+  // Using relative URLs to work with Next.js proxy
+  BASE_URL: 'http://34.60.128.41:8000/',
   ENDPOINTS: {
     LOGIN: '/api/token/',
     REFRESH: '/api/token/refresh/',
