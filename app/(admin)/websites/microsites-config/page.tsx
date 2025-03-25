@@ -7,7 +7,7 @@ export default function MicrositesPage() {
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader
         title="Microsites"
-        description="Manage your microsites and their configurations."
+        description="Manage public microsite configurations for all regions."
       />
       
       <Suspense fallback={<div>Loading...</div>}>

@@ -168,8 +168,8 @@ export function MicrositesList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center gap-4">
-        <Input
+      <div className="flex justify-end items-center gap-4">
+        {/* <Input
           placeholder="Search microsites..."
           value={searchQuery}
           onChange={(e) => {
@@ -178,7 +178,7 @@ export function MicrositesList() {
             setSearchQuery(value);
           }}
           className="max-w-sm"
-        />
+        /> */}
         <AddMicrositeDialog isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
 
