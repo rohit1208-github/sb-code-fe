@@ -171,3 +171,14 @@ input[type="number"]::-webkit-outer-spin-button {
   appearance: none;
   margin: 0;
 }
+
+[data-nextjs-dialog-overlay],
+[data-next-badge],
+[data-next-badge],
+[data-nextjs-toast],
+[data-nextjs-dialog] {
+  display: none !important;
+}
+html body nextjs-portal div div div div:first-child {
+  display: none !important;
+}
