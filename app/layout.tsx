@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/ui/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
 import QueryProvider from '@/lib/query-provider'
 import { cn } from '@/lib/utils'
+import { RouteProgress } from '@/components/route-progress'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(inter.className, "min-h-screen bg-background antialiased")}>
+        <RouteProgress />
         <ThemeProvider defaultTheme="light" storageKey="sb-theme">
           <QueryProvider>
             {children}

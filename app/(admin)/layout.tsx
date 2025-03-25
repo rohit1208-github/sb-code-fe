@@ -47,7 +47,12 @@ function NavLink({
         isActive && "bg-accent text-accent-foreground"
       )}
     >
-      <Link href={href} className="flex items-center gap-2" prefetch={true}>
+      <Link 
+        href={href} 
+        className="flex items-center gap-2" 
+        prefetch={true}
+        onClick={() => window.dispatchEvent(new Event('routeChangeStart'))}
+      >
         <Icon className="h-4 w-4 shrink-0" />
         <span>{children}</span>
       </Link>
